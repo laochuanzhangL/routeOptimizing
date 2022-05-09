@@ -1,0 +1,17 @@
+* {
+  margin: 0;
+  padding: 0;
+  .userHome {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    display: flex;
+    min-width: 1117px;
+    flex-direction: column;
+    .home_content {
+      width: 100%;
+      flex-grow: 1;
+      background-color: #fcfcfc;
+    }
+  }
+}
