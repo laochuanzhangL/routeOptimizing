@@ -12,7 +12,7 @@ const Routes = [
     component: SelectAddress,
   },
   {
-    path: '/result/:questionId',
+    path: '/result/:questionId/:finalSolutionId',
     component: Result,
   },
   {

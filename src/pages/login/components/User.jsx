@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router'
 import { Form, Input, Button, Checkbox, Skeleton, message } from 'antd'
-import { getUserIdAC } from '../../../redux/actionCreators'
-import { useDispatch } from 'react-redux'
 import {
   UserOutlined,
   LockOutlined,
@@ -23,14 +21,9 @@ export const User = () => {
       code,
     }
     httpUtil.login(data).then((res) => {
-      // 通过getUserIdAC生成action，然后dispatch出去
-      //更改redux中的userId
-
       if (res.status == 9999) {
         const { userId } = res.data
-        //dispatch(getUserIdAC(userId))
         sessionStorage.setItem('userId', userId);
-        localStorage.userId = userId
         history.push('/user')
       } else {
         message.warn(res.msg)

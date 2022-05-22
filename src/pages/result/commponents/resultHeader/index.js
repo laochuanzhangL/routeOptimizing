@@ -19,7 +19,6 @@ export const ResultHeader = (props) => {
       function (point) {
         if (point) {
         console.log(point)
-
           setCenter(point)
         } else {
           alert('您选择的地址没有解析到结果！')

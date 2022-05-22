@@ -89,11 +89,24 @@ export const SelectNodes = (props) => {
     })
     setSearchNodes([...arr])
   }
+  const detailSearch=(e)=>{
+    const keyWord = e.target.value
+    const arr = []
+    nodes.map((item) => {
+      for (const [key, value] of Object.entries(item)) {
+        const str = value + ''
+        if (str.indexOf(keyWord) >= 0) {
+          arr.push(item)
+          break
+        }
+      }
+    })
+    setSearchNodes([...arr])
+  }
   const openDetails = () => {
     setDetailsVisible(true)
   }
   const handleDelete = (e) => {
-    console.log(e)
     const { nodeId } = e
     const query = { nodeId, questionId }
     httpUtil.deleteNode(query).then((res) => {
@@ -122,6 +135,7 @@ export const SelectNodes = (props) => {
 
   const cancelDetail = () => {
     setDetailsVisible(false)
+    setSearchNodes([])
   }
   //查看详细页面的删除
   const deleteSelect = (e) => {
@@ -303,10 +317,18 @@ export const SelectNodes = (props) => {
           </Button>,
         ]}
       >
+          <div className="detail_search">
+          <Search
+            key="detailSearch"
+            placeholder="请输入目标编号/名称/地址/经纬度"
+            onChange={detailSearch}
+            enterButton
+          />
+        </div>
         <Table
           bordered
           key="detailTable"
-          dataSource={nodes}
+          dataSource={searchNodes.length ? searchNodes : nodes}
           rowSelection={detailRowSelection}
           columns={detailsColumns}
           rowKey={(record) => {

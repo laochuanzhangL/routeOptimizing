@@ -10,7 +10,7 @@ export function Login() {
   return (
     <div>
       <div className={styles['login-wrap']}>
-        <div className={styles['login-top']}>YZYL</div>
+        <div className={styles['login-top']}>物流优化</div>
         <Tabs
           className={styles['login-select-form']}
           defaultActiveKey="1"

@@ -11,4 +11,13 @@
             white-space: pre;
         }
     }
+    .text_result{
+        .text_result_title{
+            display: flex;
+            justify-content: space-between;
+            .distance{
+                width: 200px;
+            }
+        }
+    }
    

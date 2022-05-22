@@ -46,7 +46,7 @@ export const SelectHeader = (props) => {
       //文件类型校验
       const fileType = info.name.split('.').pop()
       if (fileType !== 'xlsx' && fileType !== 'xls') {
-        message.error(`上传失败：上传文件格式非.xslx`)
+        message.error(`上传失败：上传文件格式非excel文件格式`)
       }
       return false
     },
@@ -58,6 +58,11 @@ export const SelectHeader = (props) => {
         info.file.status = 'done' //更改文件状态
       }
     },
+  }
+  const downloadFile = () => {
+    httpUtil.downloadNodesFile().then((res) => {
+      exportFile(res, '选点模板文件')
+    })
   }
   const exportFile = (content, customFileName, type) => {
     let blob = new Blob([content], { type: type || 'application/vnd.ms-excel' }) // 默认excel
@@ -71,12 +76,7 @@ export const SelectHeader = (props) => {
     a.click()
     a.remove()
   }
-  const downloadFile = () => {
-    httpUtil.downloadNodesFile().then((res) => {
-      console.log(res)
-      exportFile(res, '选点模板文件')
-    })
-  }
+
   const handleUpload = () => {
     if (fileList && fileList.length) {
       //检验是否有上传文件
@@ -86,8 +86,9 @@ export const SelectHeader = (props) => {
       setLoading(true)
       httpUtil.nodesFileUpload(formData).then((res) => {
         setLoading(false)
-        if (res.status === 0) {
+        if (res.status === 200) {
           message.success('文件上传成功')
+          setUploadVisible(false)
           setFileList([])
           getNodes()
         } else {
@@ -131,7 +132,7 @@ export const SelectHeader = (props) => {
         </Button>
       </div>
       <Modal
-        key="uploadModal"
+        key="nodesUploadModal"
         visible={uploadVisible}
         //onOk={}
         onCancel={() => {

@@ -11,12 +11,12 @@ const instance = axios.create({
   headers: {
     'Content-Type': 'multipart/form-data',
   },
-  baseURL: '/',
+  baseURL: '/RoutePlanSystem',
   withCredentials: true,
 })
 // 添加返回拦截器，直接获取返回内容的data
 instance.interceptors.response.use((res) => {
-  return res.data
+  return res
 })
 
 // 封装axios方法，并导出httpReq为新的请求工具

@@ -1,7 +1,6 @@
 * {
   margin: 0;
   padding: 0;
-
   .ant-menu-vertical-left.ant-menu-sub,
   .ant-menu-vertical-right.ant-menu-sub,
   .ant-menu-vertical.ant-menu-sub {
@@ -9,7 +8,9 @@
     max-width: 120px;
   }
   .header {
+    margin: auto;
     width: 100%;
+    max-width: 2000px;
     height: 60px;
     display: flex;
     min-width: 1117px;

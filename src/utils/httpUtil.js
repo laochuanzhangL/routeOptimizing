@@ -75,6 +75,13 @@ class HttpUtil {
   deleteCars = (params) =>
     httpReq('delete', '/vehicleSystem/user/vehicle', params)
 
+  //文件导入车辆
+  carsFileUpload = (params) =>
+  uploadFile(
+    'post',
+    `vehicleSystem/excelVehicleInfo/${params.get('questionId')}`,
+    params
+  )
   /**结果模块 */
   getSolution = (params) =>
     httpReq('get', `/scheme/list?key=1&questionId=${params.questionId}`)

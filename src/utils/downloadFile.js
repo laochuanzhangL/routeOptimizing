@@ -8,7 +8,7 @@ import { message } from 'antd'
 // 给请求地址前加一个"/api"，在请求头中添加Token
 //设置请求携带cookie
 const instance = axios.create({
-  baseURL: '/',
+  baseURL: '/RoutePlanSystem',
   withCredentials: true,
 })
 // 添加返回拦截器，直接获取返回内容的data

@@ -2,7 +2,7 @@ import axios from 'axios'
 import React from 'react'
 import { useState, useEffect } from 'react'
 import { Map, Marker, NavigationControl, InfoWindow } from 'react-bmapgl'
-import { message } from 'antd'
+import { Button, message } from 'antd'
 import { SelectHeader, SelectNodes, SelectSide } from './commponents/index'
 import './styles.scss'
 import { useParams } from 'react-router-dom'
@@ -23,6 +23,7 @@ export const SelectAddress = () => {
     const formdata = { questionId }
     httpUtil.getQuestionsNodes(formdata).then((res) => {
       if (res.data.length > 0) {
+        getBeginCenter([...res.data])
         setNodes([...res.data])
         for (let node of res.data) {
           if (node.isCenter) {
@@ -35,6 +36,21 @@ export const SelectAddress = () => {
         setHaveCenter(false)
       }
     })
+  }
+
+  //获得最初地图中心点（可以看到该项目所有中心点的最佳位置）
+  const getBeginCenter = (nodes) => {
+    if (nodes.length) {
+      for (let item of nodes) {
+        const { isCenter } = item
+        if (isCenter) {
+          const { lat, lng } = item
+          let point = new BMapGL.Point(lng, lat)
+          setCenter(point)
+          break
+        }
+      }
+    }
   }
 
   //地图上面点击站点
@@ -107,7 +123,7 @@ export const SelectAddress = () => {
                 position={{ lng: lng, lat: lat }}
                 icon={isCenter == 1 ? 'simple_blue' : 'simple_red'}
                 key={nodeId}
-               offset={new BMapGL.Size(0, -8)}
+                offset={new BMapGL.Size(0, -8)}
                 onMouseover={(e) => {
                   const handle = () => {
                     return setWindowInfo([

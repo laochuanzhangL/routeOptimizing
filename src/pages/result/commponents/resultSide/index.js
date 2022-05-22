@@ -6,6 +6,8 @@ export const ResultSide = (props) => {
   const { sideVisible, setSideVisible, carRoutes, trackAnis, routeLoading } =
     props
   const [textVisible, setTextVisible] = useState(false)
+  const [showCarId, setShowCarId] = useState()
+  const [carDistance, setCarDistance] = useState({})
   const [data, setData] = useState()
   const resultsColumns = [
     {
@@ -48,9 +50,9 @@ export const ResultSide = (props) => {
   ]
   const textResultcolumns = [
     {
-      title: '',
+      title: '顺序号',
       dataIndex: 'id',
-      width: 5,
+      width: 50,
       render: (render) => {
         return render
       },
@@ -66,12 +68,20 @@ export const ResultSide = (props) => {
     {
       title: '详细地址',
       dataIndex: 'nodeAddress',
-      width:250,
+      width: 250,
       render: (render) => {
         return render
       },
     },
   ]
+
+  // useEffect(() => {
+  //   startShowCar(showCarId)
+  // }, [showCarId])
+
+  useEffect(() => {
+    getCarDistance()
+  }, [trackAnis])
 
   useEffect(() => {
     openText()
@@ -79,6 +89,15 @@ export const ResultSide = (props) => {
 
   const closeSide = () => {
     setSideVisible(false)
+  }
+
+  const getCarDistance = () => {
+    let tempCarDistance = {}
+    trackAnis.map((item) => {
+      const { vehicleId, distance } = item
+      tempCarDistance[vehicleId] = distance
+    })
+    setCarDistance(tempCarDistance)
   }
 
   //开始对应的lushu动画
@@ -101,6 +120,10 @@ export const ResultSide = (props) => {
     }
   }
 
+  const startShowCar = (id) => {
+ 
+  }
+
   //找到对应要打开的车辆信息
   const findText = (id) => {
     carRoutes.map((item) => {
@@ -110,11 +133,16 @@ export const ResultSide = (props) => {
         const { vehicleNumber, type } = vehicle
         let path = []
         const len = route.length
-        for(let i=0;i<len;i++){
-          const {nodeName,nodeAddress}=route[i]
-          path.push({nodeName,nodeAddress,id:i+1})
+        for (let i = 0; i < len; i++) {
+          const { nodeName, nodeAddress } = route[i]
+          path.push({ nodeName, nodeAddress, id: i + 1 })
         }
-        const data = { vehicleNumber, type, path }
+        const data = {
+          vehicleNumber,
+          type,
+          path,
+          distance: carDistance[vehicleId],
+        }
         setData(data)
       }
     })
@@ -172,7 +200,18 @@ export const ResultSide = (props) => {
         key="textResultModal"
         width="1000px"
         zIndex="1001"
-        title={data ? `${data.type}  :  ${data.vehicleNumber}` : ''}
+        className="text_result"
+        title={
+          <div className="text_result_title">
+            <div>{data ? `${data.type}  :  ${data.vehicleNumber}` : ''}</div>
+            <div className="distance">
+              总里程:
+              {data && data.distance
+                ? `${(data.distance / 1000).toFixed(3)}km`
+                : '请等待渲染完成'}
+            </div>
+          </div>
+        }
         onCancel={closeTextResult}
         footer={
           <Button type="primary" key="ok" onClick={closeTextResult}>
@@ -182,8 +221,10 @@ export const ResultSide = (props) => {
       >
         <Table
           columns={textResultcolumns}
-          dataSource={data?data.path:[]}
+          dataSource={data ? data.path : []}
           key="textResultTable"
+          scroll={{ y: 500 }}
+          pagination={false}
         />
       </Modal>
     </Fragment>

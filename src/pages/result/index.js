@@ -6,19 +6,17 @@ import httpUtil from '../../utils/httpUtil'
 import car from '../../assets/car.png'
 import redMark from '../../assets/redMark.png'
 import blueMark from '../../assets/blueMark.png'
-import { useHistory, useParams } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import './styles.scss'
 export const Result = () => {
   const routeParams = useParams()
-  const { questionId } = routeParams
-  const history = useHistory()
+  const { finalSolutionId,questionId } = routeParams
   const [sideVisible, setSideVisible] = useState(true)
   const [center, setCenter] = useState({
     lng: 116.402544,
     lat: 39.928216,
   })
   const [nodes, setNodes] = useState([])
-  const [time, setTime] = useState(1000)
   const [cars, setCars] = useState([])
   const [colors, setColors] = useState([])
   const [map, setMap] = useState()
@@ -30,6 +28,11 @@ export const Result = () => {
     getRoutes()
     getCars()
     getNodes()
+    return(()=>{
+      setcarRoutes([])
+      setCars([])
+      setNodes([])
+    })
   }, [questionId])
 
   useEffect(() => {
@@ -39,7 +42,10 @@ export const Result = () => {
 
   useEffect(() => {
     initMap()
-    calculateProgress()
+    openNotification()
+    return(()=>{
+      setTrackAnis([])
+    })
   }, [carRoutes])
 
   useEffect(() => {
@@ -57,8 +63,15 @@ export const Result = () => {
       questionId,
     }
     httpUtil.getSolution(parmas).then((res) => {
+      console.log(res)
       if (res.status === 0) {
-        setcarRoutes(res.data[res.data.length - 1].routes)
+        res.data.map(item=>{
+          const {finalSolutionId:id}=item
+          if(finalSolutionId==id){
+            const {routes}=item
+            setcarRoutes(routes)
+          }
+        })
       }
     })
   }
@@ -131,27 +144,56 @@ export const Result = () => {
     }
   }
 
-  //计算绘制路线所需要时间
-  const calculateProgress = () => {
-    if (carRoutes.length) {
-      let allRoutes = 0
-      let allTime = 0
-      carRoutes.map((item) => {
-        allRoutes = Math.max(item.route.length - 1, allRoutes)
-      })
-      allTime = (allRoutes + carRoutes.length - 1) * time
-      openNotification(allTime)
-    }
-  }
-
   //判断路线绘制是否完成
   const judgeLoading = () => {
     if (carRoutes.length) {
       if (trackAnis.length == carRoutes.length) {
         message.success('路线绘制成功')
         setRouteLoading(false)
+        notification.close('drawRoute')
       }
     }
+  }
+  //
+  const getPath = async (map, route) => {
+    const points = []
+    const driving = new BMap.DrivingRoute(map)
+    const { lat: lat1, lng: lng1 } = route[0]
+    const { lat: lat2, lng: lng2 } = route[1]
+    let point1 = new BMap.Point(lng1, lat1)
+    let point2 = new BMap.Point(lng2, lat2)
+    driving.search(point1, point2)
+    let distance=0
+    function judge(driving) {
+      return new Promise((resolve, reject) => {
+        driving.setSearchCompleteCallback(function () {
+          const pts = driving.getResults().getPlan(0).getRoute(0).getPath()
+          let dis = driving.getResults().getPlan(0).getDistance()
+          if (pts.length) {
+            if (dis[dis.length - 1] == '里') {
+              distance = distance + parseFloat(dis) * 1000
+            } else {
+              distance = distance + parseFloat(dis)
+            }
+            points.push.apply(points, pts)
+            resolve({ points, distance })
+          }
+        })
+      })
+    }
+    let i = 1
+    while (i < route.length-1) {
+      const res = await judge(driving)
+      const { lat: lat1, lng: lng1 } = route[i]
+      const { lat: lat2, lng: lng2 } = route[i + 1]
+      let point1 = new BMap.Point(lng1, lat1)
+      let point2 = new BMap.Point(lng2, lat2)
+      driving.search(point1, point2)
+      i++
+    }
+    return new Promise((resolve, reject) => {
+      resolve({ points, distance })
+    })
   }
 
   //绘制路线
@@ -161,66 +203,40 @@ export const Result = () => {
     const pathLen = carRoutes.length
     setColors([])
     for (let i = 0; i < carRoutes.length; i++) {
-      (function (i) {
-        setTimeout(function () {
-          const points = []
-          const driving = new BMap.DrivingRoute(map)
-          const { route, vehicle } = carRoutes[i]
-          const { vehicleId } = vehicle
-          for (let i = 0; i < route.length - 1; i++) {
-            (function (i) {
-              setTimeout(function () {
-                const { lat: lat1, lng: lng1 } = route[i]
-                const { lat: lat2, lng: lng2 } = route[i + 1]
-                let point1 = new BMap.Point(lng1, lat1)
-                let point2 = new BMap.Point(lng2, lat2)
-                driving.search(point1, point2)
-              }, i * time)
-            })(i)
-          }
-          const color = getRandomColor(colors)
-          setColors([...colors, color])
-          const len = route.length
-          let distance = 0
-          let promise = new Promise((resolve, reject) => {
-            let temp = 1
-            driving.setSearchCompleteCallback(function () {
-              const pts = driving.getResults().getPlan(0).getRoute(0).getPath() //通过驾车实例，获得一系列点的数组
-              const dis = driving.getResults().getPlan(0).getDistance()
-              distance = distance + parseFloat(dis)
-              points.push.apply(points, pts)
-              temp++
-              driving.clearResults()
-              if (temp == len) {
-                resolve(points)
-              }
-            })
-          }).then((res) => {
-            const polyline = new BMap.Polyline(points, {
-              strokeColor: color,
-              strokeWeight: 4,
-            })
-            map.addOverlay(polyline)
-            const lushu = new BMapLib.LuShu(map, points, {
-              landmarkPois: [],
-              speed: 5000,
-              icon: new BMap.Icon(`${car}`, new BMap.Size(24, 24), {
-                anchor: new BMap.Size(5, 10),
-              }),
-              autoView: true,
-              enableRotation: false,
-            })
-            path.push({
-              trackAni: lushu,
-              vehicleId,
-              isRunning: false,
-            })
-            if (path.length == pathLen) {
-              setTrackAnis(path)
-            }
-          })
-        }, i * time)
-      })(i)
+      const points = []
+      const driving = new BMap.DrivingRoute(map)
+      const { route, vehicle } = carRoutes[i]
+      const { vehicleId } = vehicle
+      const color = getRandomColor(colors)
+      setColors([...colors, color])
+      const p = getPath(map, route)
+      p.then((res) => {
+        const { points, distance } = res
+        carRoutes[i].distance=distance
+        const polyline = new BMap.Polyline(points, {
+          strokeColor: color,
+          strokeWeight: 4,
+        })
+        map.addOverlay(polyline)
+        const lushu = new BMapLib.LuShu(map, points, {
+          landmarkPois: [],
+          speed: distance / 15 > 8000 ? 8000 : distance / 15,
+          icon: new BMap.Icon(`${car}`, new BMap.Size(24, 24), {
+            anchor: new BMap.Size(5, 10),
+          }),
+          autoView: true,
+          enableRotation: false,
+        })
+        path.push({
+          trackAni: lushu,
+          vehicleId,
+          distance:distance,
+          isRunning: false,
+        })
+        if (path.length == pathLen) {
+          setTrackAnis(path)
+        }
+      })
     }
   }
   //exist_color为已存在的颜色数组
@@ -279,8 +295,7 @@ export const Result = () => {
 
   const openNotification = (allTime) => {
     notification.open({
-      message: '路线绘制中',
-      description: `预计需要等待${allTime / 1000}s`,
+      message: '路线绘制中......',
       key: 'drawRoute',
       placement: 'bottomLeft',
       duration: allTime / 1000,
@@ -311,7 +326,11 @@ export const Result = () => {
               }
         }
       >
-        <ResultHeader  key="ResultHeader"setCenter={setCenter} sideVisible={sideVisible} />
+        <ResultHeader
+          key="ResultHeader"
+          setCenter={setCenter}
+          sideVisible={sideVisible}
+        />
         <div
           id="allmap"
           style={{
