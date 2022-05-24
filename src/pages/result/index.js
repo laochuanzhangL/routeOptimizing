@@ -60,18 +60,11 @@ export const Result = () => {
   //请求获得所有路径
   const getRoutes = () => {
     const parmas = {
-      questionId,
+      finalSolutionId,
     }
-    httpUtil.getSolution(parmas).then((res) => {
-      console.log(res)
+    httpUtil.getResultRoutes(parmas).then((res) => {
       if (res.status === 0) {
-        res.data.map(item=>{
-          const {finalSolutionId:id}=item
-          if(finalSolutionId==id){
-            const {routes}=item
-            setcarRoutes(routes)
-          }
-        })
+          setcarRoutes(res.data.routes)
       }
     })
   }
@@ -155,7 +148,7 @@ export const Result = () => {
     }
   }
   //
-  const getPath = async (map, route) => {
+  const getPath = async (map, route,color) => {
     const points = []
     const driving = new BMap.DrivingRoute(map)
     const { lat: lat1, lng: lng1 } = route[0]
@@ -169,6 +162,11 @@ export const Result = () => {
         driving.setSearchCompleteCallback(function () {
           const pts = driving.getResults().getPlan(0).getRoute(0).getPath()
           let dis = driving.getResults().getPlan(0).getDistance()
+          const polyline = new BMap.Polyline(pts, {
+            strokeColor: color,
+            strokeWeight: 4,
+          })
+          map.addOverlay(polyline)
           if (pts.length) {
             if (dis[dis.length - 1] == '里') {
               distance = distance + parseFloat(dis) * 1000
@@ -209,15 +207,10 @@ export const Result = () => {
       const { vehicleId } = vehicle
       const color = getRandomColor(colors)
       setColors([...colors, color])
-      const p = getPath(map, route)
+      const p = getPath(map, route,color)
       p.then((res) => {
         const { points, distance } = res
         carRoutes[i].distance=distance
-        const polyline = new BMap.Polyline(points, {
-          strokeColor: color,
-          strokeWeight: 4,
-        })
-        map.addOverlay(polyline)
         const lushu = new BMapLib.LuShu(map, points, {
           landmarkPois: [],
           speed: distance / 15 > 8000 ? 8000 : distance / 15,
@@ -227,6 +220,7 @@ export const Result = () => {
           autoView: true,
           enableRotation: false,
         })
+      
         path.push({
           trackAni: lushu,
           vehicleId,
@@ -269,15 +263,15 @@ export const Result = () => {
   }
   const getNodes = () => {
     const params = {
-      questionId,
+      finalSolutionId,
     }
-    httpUtil.getQuestionsNodes(params).then((res) => {
-      if (res.status == 1000) {
+    httpUtil.getResultNodes(params).then((res) => {
+      console.log(res)
+      if (res.status == 0) {
         setNodes([...res.data])
       }
     })
   }
-
   const getCars = () => {
     const params = {
       questionId,

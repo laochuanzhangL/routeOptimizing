@@ -85,6 +85,13 @@ class HttpUtil {
   /**结果模块 */
   getSolution = (params) =>
     httpReq('get', `/scheme/list?key=1&questionId=${params.questionId}`)
+  //获取某个结果的路径
+  getResultRoutes=(params)=>
+    httpReq('get', `/scheme/${params.finalSolutionId}`)
+  
+  getResultNodes=(params)=>
+    httpReq('get', `/scheme/nodes/${params.finalSolutionId}`)
+  
 }
 
 export default new HttpUtil()

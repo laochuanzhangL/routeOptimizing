@@ -113,7 +113,6 @@ export const SelectAddress = () => {
           height: '100vh',
         }}
       >
-        <Marker position={center} icon="loc_blue" />
         {/*   点击后地图上添加Marker */}
         {nodes.map((item) => {
           const { lat, lng, id, nodeAddress, nodeName, isCenter, nodeId } = item

@@ -16,7 +16,7 @@ import { Link } from 'react-router-dom'
 import dayjs from 'dayjs'
 export const Home = () => {
   // 获取userId
-  const userId = sessionStorage.getItem('userId');
+  const userId = sessionStorage.getItem('userId')
   //表格数据
   const [data, setData] = useState([])
 
@@ -37,13 +37,22 @@ export const Home = () => {
   //表格列表
   const columns = [
     {
+      title: '创建时间',
+      dataIndex: 'createTime',
+      width: 200,
+      render: (e) => {
+        return dayjs(e).format('YYYY-MM-DD')
+      },
+    },
+    {
       title: '项目名',
       dataIndex: 'questionName',
-      width: 200,
+      width: 150,
       render: (e) => {
         return e
       },
     },
+
     {
       title: '数据配备',
       key: 'prepare',
@@ -59,27 +68,32 @@ export const Home = () => {
         )
       },
     },
- 
+
     {
       title: '查看结果',
       key: 'result',
       width: 200,
       render: (e) => {
         const { questionId } = e
-         return <span className="pointor_span"  onClick={()=>{
-          openResult(questionId)
-         }}> <font color="#1890ff">查看结果</font></span>
-        
-          // <Link to={`/result/${questionId}`}>查看结果</Link>
-        //   e.processState >= 2 ? (
-        //   <Link to={`/result/${questionId}`}>查看结果</Link>
-        // ) : (
-        //   <span className="modify">
-        //     <font color="gray">查看结果</font>
-        //   </span>
-        // )
+
+        return e.processState == 4 ? (
+          <span
+            className="pointor_span"
+            onClick={() => {
+              openResult(questionId)
+            }}
+          >
+            <font color="#1890ff">查看结果</font>
+          </span>
+        ) : (
+          <span className="modify pointor_span">
+            <font color="gray">查看结果</font>
+          </span>
+        )
       },
     },
+    
+   
     {
       title: '操作',
       dataIndex: 'action',
@@ -99,15 +113,23 @@ export const Home = () => {
       ),
     },
   ]
-  const resultcolumns=[
+  const resultcolumns = [
     {
       title: '结果创建时间',
       dataIndex: 'createTime',
-      width: 300,
+      width: 200,
       render: (_, record) => {
-        const {createTime}=record
-        const time =dayjs(createTime).format('YYYY-MM-DD HH:mm')
+        const { createTime } = record
+        const time = dayjs(createTime).format('YYYY-MM-DD HH:mm')
         return time
+      },
+    },
+    {
+      title: '使用算法',
+      dataIndex: 'algorithm',
+      width: 200,
+      render: (e) => {
+        return e
       },
     },
     {
@@ -115,18 +137,24 @@ export const Home = () => {
       dataIndex: 'action',
       width: 100,
       render: (_, record) => {
-        const {routes}=record
-        return routes?(<Link to={`/result/${showResultId}/${record.finalSolutionId}`}>前往查看</Link>):<font color="gray">暂无数据</font>
-      }
+        const { routes } = record
+        return routes ? (
+          <Link to={`/result/${showResultId}/${record.finalSolutionId}`}>
+            前往查看
+          </Link>
+        ) : (
+          <font color="gray">暂无数据</font>
+        )
+      },
     },
   ]
   useEffect(() => {
     getQuestions()
   }, [userId])
 
-useEffect(() => {
-  getAllResults()
-}, [showResultId])
+  useEffect(() => {
+    getAllResults()
+  }, [showResultId])
 
   useEffect(() => {
     notification.close('drawRoute')
@@ -146,16 +174,16 @@ useEffect(() => {
     })
   }
 
-  const getAllResults=()=>{
-    if(showResultId){
-      httpUtil.getSolution({questionId:showResultId}).then(res=>{
-        if(res.status==0){
+  const getAllResults = () => {
+    if (showResultId) {
+      httpUtil.getSolution({ questionId: showResultId }).then((res) => {
+        if (res.status == 0) {
           setAllResults(res.data)
         }
       })
     }
   }
-  const openResult=(id)=>{
+  const openResult = (id) => {
     setShowResultId(id)
     setResultModalVisible(true)
   }
@@ -163,7 +191,7 @@ useEffect(() => {
   const addItem = () => {
     setVisible(!visible)
   }
-  const closeResult=()=>{
+  const closeResult = () => {
     setResultModalVisible(false)
   }
 
@@ -196,7 +224,6 @@ useEffect(() => {
     }
     httpUtil.getQuestions(formdata).then((res) => {
       if (res.status == 9999) {
-        console.log(res)
         setData(res.data)
       }
     })
@@ -206,7 +233,12 @@ useEffect(() => {
     <div className="home">
       <div className="content">
         <div className="table_header">
-          <Button type="primary" className="table_btn" onClick={addItem} key="addItem">
+          <Button
+            type="primary"
+            className="table_btn"
+            onClick={addItem}
+            key="addItem"
+          >
             添加项目
           </Button>
         </div>

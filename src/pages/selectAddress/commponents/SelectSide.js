@@ -143,9 +143,7 @@ export const SelectSide = (props) => {
       formData.append('file', fileList[0].originFileObj)
       formData.append('questionId', questionId)
       setLoading(true)
-      console.log(formData.get('file'))
       httpUtil.carsFileUpload(formData).then((res) => {
-        console.log(res)
         setLoading(false)
         if (res.status ===200) {
           message.success('文件上传成功')
@@ -178,7 +176,6 @@ export const SelectSide = (props) => {
   const getAllCars = () => {
     const data = { questionId }
     httpUtil.getAllCars(data).then((res) => {
-      console.log(res)
       if (res.status == 9999) {
         setCars([...res.data])
       }
@@ -218,7 +215,7 @@ export const SelectSide = (props) => {
     const query = { questionId, key: math }
     httpUtil.executeAlgorithm(query).then((res) => {
       if (res.status === 0) {
-        openNotification()
+        openNotification(res.data)
         setMathVisible(false)
       } else {
         message.error('数据有误')
@@ -226,7 +223,7 @@ export const SelectSide = (props) => {
     })
   }
   //算法计算完成后的通知
-  const openNotification = () => {
+  const openNotification = id => {
     const key = `open${Date.now()}`
     const btn = (
       <Button
@@ -234,7 +231,7 @@ export const SelectSide = (props) => {
         size="small"
         onClick={() => {
           notification.close(key)
-          history.push(`/result/${questionId}`)
+          history.push(`/result/${questionId}/${id}`)
         }}
       >
         前往查看
