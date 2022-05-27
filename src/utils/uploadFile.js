@@ -39,6 +39,10 @@ export const uploadFile = (method, url, data, resType) => {
         reject({ status, errInfo })
         // 根据状态码做提示处理
         switch (status) {
+          case 400:
+            message.error(`用户未登录: ${errInfo}`)
+            window.location.href = '/';
+            break
           case 401:
             message.error(`认证失败: ${errInfo}`)
             break

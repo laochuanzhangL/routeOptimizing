@@ -166,7 +166,7 @@ export const Home = () => {
     }
     httpUtil.deleteQuestion(formdata).then((res) => {
       if (res.status == 9999) {
-        message.success(res.msg)
+        message.success("删除成功")
         getQuestions()
       } else {
         message.error(res.msg)
@@ -203,7 +203,7 @@ export const Home = () => {
     }
     httpUtil.creatQuestion(data).then((res) => {
       if (res.status == 9999) {
-        message.success(res.msg)
+        message.success("添加成功")
         getQuestions()
         setVisible(!visible)
       } else {

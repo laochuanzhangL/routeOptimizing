@@ -20,7 +20,6 @@ export function myThrottle(handle, wait) {
       timer = setTimeout(() => {
         clearTimeout(timer)
         timer = null
-
         handle.call(self, ...args)
         previous = new Date()
       }, interval)
