@@ -80,7 +80,7 @@ export const Home = () => {
           <span
             className="pointor_span"
             onClick={() => {
-              openResult(questionId)
+              getAllResults(questionId)
             }}
           >
             <font color="#1890ff">查看结果</font>
@@ -92,8 +92,7 @@ export const Home = () => {
         )
       },
     },
-    
-   
+
     {
       title: '操作',
       dataIndex: 'action',
@@ -152,9 +151,9 @@ export const Home = () => {
     getQuestions()
   }, [userId])
 
-  useEffect(() => {
-    getAllResults()
-  }, [showResultId])
+  // useEffect(() => {
+  //   getAllResults()
+  // }, [showResultId])
 
   useEffect(() => {
     notification.close('drawRoute')
@@ -166,7 +165,7 @@ export const Home = () => {
     }
     httpUtil.deleteQuestion(formdata).then((res) => {
       if (res.status == 9999) {
-        message.success("删除成功")
+        message.success('删除成功')
         getQuestions()
       } else {
         message.error(res.msg)
@@ -174,18 +173,16 @@ export const Home = () => {
     })
   }
 
-  const getAllResults = () => {
-    if (showResultId) {
-      httpUtil.getSolution({ questionId: showResultId }).then((res) => {
-        if (res.status == 0) {
-          setAllResults(res.data)
-        }
-      })
-    }
-  }
-  const openResult = (id) => {
+  const getAllResults = (id) => {
     setShowResultId(id)
-    setResultModalVisible(true)
+    httpUtil.getSolution({ questionId: id }).then((res) => {
+      if (res.status == 0) {
+        setAllResults(res.data)
+        setResultModalVisible(true)
+      } else {
+        message('暂无数据')
+      }
+    })
   }
 
   const addItem = () => {
@@ -203,7 +200,7 @@ export const Home = () => {
     }
     httpUtil.creatQuestion(data).then((res) => {
       if (res.status == 9999) {
-        message.success("添加成功")
+        message.success('添加成功')
         getQuestions()
         setVisible(!visible)
       } else {
