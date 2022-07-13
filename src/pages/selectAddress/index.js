@@ -2,7 +2,7 @@ import axios from 'axios'
 import React from 'react'
 import { useState, useEffect } from 'react'
 import { Map, Marker, NavigationControl, InfoWindow } from 'react-bmapgl'
-import { Button, message } from 'antd'
+import { message } from 'antd'
 import { SelectHeader, SelectNodes, SelectSide } from './commponents/index'
 import './styles.scss'
 import { useParams } from 'react-router-dom'
@@ -154,8 +154,8 @@ export const SelectAddress = () => {
             />
           )
         })}
-        <NavigationControl />
       </Map>
+      <NavigationControl />
     </div>
   )
 }

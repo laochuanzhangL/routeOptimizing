@@ -17,7 +17,7 @@ import {
 } from 'antd'
 import httpUtil from '../../../utils/httpUtil'
 import { useHistory } from 'react-router'
-import { CheckOutlined, InboxOutlined, } from '@ant-design/icons'
+import { CheckOutlined, InboxOutlined } from '@ant-design/icons'
 const { Option } = Select
 export const SelectSide = (props) => {
   const { questionId, haveCenter } = props
@@ -31,7 +31,7 @@ export const SelectSide = (props) => {
   const [mathes, setMathes] = useState([])
   const [math, setMath] = useState(1)
   const history = useHistory()
-  const userId =sessionStorage.getItem('userId')
+  const userId = sessionStorage.getItem('userId')
   const { Dragger } = Upload
   const carsColumns = [
     {
@@ -145,7 +145,7 @@ export const SelectSide = (props) => {
       setLoading(true)
       httpUtil.carsFileUpload(formData).then((res) => {
         setLoading(false)
-        if (res.status ===200) {
+        if (res.status === 200) {
           message.success('文件上传成功')
           setUploadVisible(false)
           setFileList([])
@@ -183,13 +183,8 @@ export const SelectSide = (props) => {
   }
   const getAllMathes = () => {
     httpUtil.getAllAlgorithmNames().then((res) => {
-      if (res.status == 9999) {
-        const obj = res.data
-        const temp = []
-        for (let key in obj) {
-          temp.push({ key: key, value: obj[key] })
-        }
-        setMathes(temp)
+      if (res.status == 0) {
+        setMathes(res.data)
       }
     })
   }
@@ -223,7 +218,7 @@ export const SelectSide = (props) => {
     })
   }
   //算法计算完成后的通知
-  const openNotification = id => {
+  const openNotification = (id) => {
     const key = `open${Date.now()}`
     const btn = (
       <Button
@@ -256,7 +251,7 @@ export const SelectSide = (props) => {
   const onMathChange = (e) => {
     setMath(e)
   }
-  const openUploadCars=()=>{
+  const openUploadCars = () => {
     setUploadVisible(true)
   }
   return (
@@ -283,7 +278,9 @@ export const SelectSide = (props) => {
               <Button type="primary" onClick={openAddCars}>
                 添加车辆
               </Button>
-              <Button type="link" onClick={openUploadCars}>文件导入</Button>
+              <Button type="link" onClick={openUploadCars}>
+                文件导入
+              </Button>
             </div>
             <div className="right_btn">
               <Button type="primary" onClick={cancelCars}>
@@ -404,11 +401,11 @@ export const SelectSide = (props) => {
             defaultActiveFirstOption
             allowClear
             value={math}
-            placeholder="随机算法"
+            placeholder="顺序分配算法"
           >
             {mathes.map((item) => {
-              const { key, value } = item
-              return <Option value={key}>{value}</Option>
+              const { key, name } = item
+              return <Option value={key}>{name}</Option>
             })}
           </Select>
         </Form.Item>
@@ -430,9 +427,7 @@ export const SelectSide = (props) => {
         }}
         height="300px"
         footer={[
-          <Button type="link" /* onClick={downloadFile} */>
-            模板下载
-          </Button>,
+          <Button type="link" /* onClick={downloadFile} */>模板下载</Button>,
           <div>
             {loading ? (
               <Spin

@@ -56,7 +56,7 @@ class HttpUtil {
   downloadNodesFile = () => downloadFile('get', '/node/download', {}, 'blob')
   /**算法模块 */
   //获取所有算法
-  getAllAlgorithmNames = () => httpReq('get', '/algorithm/getAllAlgorithmNames')
+  getAllAlgorithmNames = () => httpReq('get', '/algorithm/list?type=0')
   //选择算法并执行
   executeAlgorithm = (params) =>
     httpReq('post', `/scheme?key=${params.key}&questionId=${params.questionId}`)
@@ -91,7 +91,6 @@ class HttpUtil {
   
   getResultNodes=(params)=>
     httpReq('get', `/scheme/nodes/${params.finalSolutionId}`)
-  
 }
 
 export default new HttpUtil()

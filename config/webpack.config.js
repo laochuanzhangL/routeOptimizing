@@ -561,6 +561,7 @@ module.exports = function (webpackEnv) {
         },
       ].filter(Boolean),
     },
+    devtool:'inline-source-map',
     plugins: [
       // Generates an `index.html` file with the <script> injected.
       new HtmlWebpackPlugin(
