@@ -28,6 +28,7 @@ export const httpReq = (method, url, data, resType) => {
       },
       (err) => {
         // 错误在这统一处理
+        console.log(err)
         const status = err.response.status
         const errInfo = err.response.data.message || status
         // 将错误信息传递下去
@@ -45,7 +46,7 @@ export const httpReq = (method, url, data, resType) => {
             message.error(`未授权: ${errInfo}`)
             setTimeout(() => {
               window.location.href = '/'
-            }, 1500)
+            }, 1000)
             break
           case 404:
             message.error(`未找到资源: ${errInfo}`)
@@ -54,6 +55,7 @@ export const httpReq = (method, url, data, resType) => {
             message.warning(`服务器未能处理: ${errInfo}`)
             break
           default:
+            message.error(`错误信息: ${errInfo}`)
             break
         }
       }

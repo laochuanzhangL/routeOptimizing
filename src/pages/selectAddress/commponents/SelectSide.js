@@ -320,14 +320,16 @@ export const SelectSide = (props) => {
         >
           <Form.Item
             label="类型"
+            key="type"
             name="type"
             rules={[{ required: true, message: '请输入车辆类型' }]}
           >
             <Input bordered="false" placeholder="请输入车辆类型" />
           </Form.Item>
           <Form.Item
-            label="类型"
+            label="车牌号"
             name="vehicleNumber"
+            key="vehicleNumber"
             rules={[{ required: true, message: '请输入车牌号' }]}
           >
             <Input bordered="false" placeholder="请输入车牌号" />
@@ -335,6 +337,7 @@ export const SelectSide = (props) => {
           <Form.Item
             label="容量"
             name="capacity"
+            key="capacity"
             required
             rules={[{ required: true, message: '请输入数字' }]}
           >
@@ -343,6 +346,7 @@ export const SelectSide = (props) => {
           <Form.Item
             label="耗油量"
             name="oil"
+            key="oil"
             rules={[{ required: true, message: '请输入车辆耗油量' }]}
           >
             <Input bordered="false" placeholder="请输入车辆耗油量" />
@@ -350,6 +354,7 @@ export const SelectSide = (props) => {
           <Form.Item
             label="价格"
             name="price"
+            key="price"
             rules={[{ required: true, message: '请输入车辆价格' }]}
           >
             <Input bordered="false" placeholder="请输入车辆价格" />
@@ -357,11 +362,13 @@ export const SelectSide = (props) => {
           <Form.Item
             label="生产日期"
             name="date"
+            key="date"
             rules={[{ required: true, message: '请选择车辆生产日期日期' }]}
           >
             <DatePicker placeholder="生产日期" />
           </Form.Item>
           <Form.Item
+            key="submmit"
             style={{
               display: 'flex',
               justifyContent: 'center',
@@ -405,7 +412,11 @@ export const SelectSide = (props) => {
           >
             {mathes.map((item) => {
               const { key, name } = item
-              return <Option value={key}>{name}</Option>
+              return (
+                <Option value={key} key={key}>
+                  {name}
+                </Option>
+              )
             })}
           </Select>
         </Form.Item>
