@@ -50,7 +50,7 @@ export const uploadFile = (method, url, data, resType) => {
             message.error(`未授权: ${errInfo}`)
             setTimeout(() => {
               window.location.href = '/'
-            }, 1500)
+            }, 1000)
             break
           case 404:
             message.error(`未找到资源: ${errInfo}`)
@@ -59,6 +59,7 @@ export const uploadFile = (method, url, data, resType) => {
             message.warning(`服务器未能处理: ${errInfo}`)
             break
           default:
+            message.error(`错误信息: ${errInfo}`)
             break
         }
       }

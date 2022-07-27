@@ -8,6 +8,7 @@ import {
 import { useHistory } from 'react-router'
 import { useState } from 'react'
 import httpUtil from '../../../utils/httpUtil'
+import { exportFile } from '../../../utils/exportFile'
 export const SelectHeader = (props) => {
   const [uploadVisible, setUploadVisible] = useState(false)
   const [fileList, setFileList] = useState([])
@@ -64,18 +65,7 @@ export const SelectHeader = (props) => {
       exportFile(res, '选点模板文件')
     })
   }
-  const exportFile = (content, customFileName, type) => {
-    let blob = new Blob([content], { type: type || 'application/vnd.ms-excel' }) // 默认excel
-    let filename = content.filename || customFileName
-    let URL = window.URL || window.webkitURL
-    let objectUrl = URL.createObjectURL(content)
-    let a = document.createElement('a')
-    a.href = objectUrl
-    a.download = filename
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-  }
+ 
 
   const handleUpload = () => {
     if (fileList && fileList.length) {

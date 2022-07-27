@@ -50,7 +50,7 @@ export const downloadFile = (method, url, data, resType) => {
         switch (status) {
           case 400:
             message.error(`用户未登录: ${errInfo}`)
-            window.location.href = '/';
+            window.location.href = '/'
             break
           case 401:
             message.error(`认证失败: ${errInfo}`)
@@ -59,7 +59,7 @@ export const downloadFile = (method, url, data, resType) => {
             message.error(`未授权: ${errInfo}`)
             setTimeout(() => {
               window.location.href = '/'
-            }, 1500)
+            }, 1000)
             break
           case 404:
             message.error(`未找到资源: ${errInfo}`)
@@ -68,6 +68,7 @@ export const downloadFile = (method, url, data, resType) => {
             message.warning(`服务器未能处理: ${errInfo}`)
             break
           default:
+            message.error(`错误信息: ${errInfo}`)
             break
         }
       }

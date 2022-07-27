@@ -77,20 +77,25 @@ class HttpUtil {
 
   //文件导入车辆
   carsFileUpload = (params) =>
-  uploadFile(
-    'post',
-    `vehicleSystem/excelVehicleInfo/${params.get('questionId')}`,
-    params
-  )
+    uploadFile(
+      'post',
+      `/vehicleSystem/excelVehicleInfo/${params.get('questionId')}`,
+      params
+    )
   /**结果模块 */
   getSolution = (params) =>
     httpReq('get', `/scheme/list?questionId=${params.questionId}`)
   //获取某个结果的路径
-  getResultRoutes=(params)=>
+  getResultRoutes = (params) =>
     httpReq('get', `/scheme/${params.finalSolutionId}`)
-  
-  getResultNodes=(params)=>
+  //获得结果的所有点
+  getResultNodes = (params) =>
     httpReq('get', `/scheme/nodes/${params.finalSolutionId}`)
+
+  //下载文本结果
+  downloadResultsFile = params =>
+    downloadFile('get', `/scheme/downloadResult?finalSolutionId=${params.finalSolutionId}`, {}, 'blob')
+  /**算法模块 */
 }
 
 export default new HttpUtil()

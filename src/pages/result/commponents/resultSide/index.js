@@ -1,10 +1,18 @@
 import React, { useState, useEffect, Fragment } from 'react'
 import { Drawer, Button, Table, message, Modal } from 'antd'
-import { RightOutlined } from '@ant-design/icons'
+import { RightOutlined, DownloadOutlined } from '@ant-design/icons'
 import './styles.scss'
+import httpUtil from '../../../../utils/httpUtil'
+import { exportFile } from '../../../../utils/exportFile'
 export const ResultSide = (props) => {
-  const { sideVisible, setSideVisible, carRoutes, trackAnis, routeLoading } =
-    props
+  const {
+    sideVisible,
+    setSideVisible,
+    carRoutes,
+    trackAnis,
+    routeLoading,
+    finalSolutionId,
+  } = props
   const [textVisible, setTextVisible] = useState(false)
   const [showCarId, setShowCarId] = useState()
   const [carDistance, setCarDistance] = useState({})
@@ -85,6 +93,9 @@ export const ResultSide = (props) => {
 
   useEffect(() => {
     openText()
+    return () => {
+      setTextVisible(false)
+    }
   }, [data])
 
   const closeSide = () => {
@@ -120,10 +131,6 @@ export const ResultSide = (props) => {
     }
   }
 
-  const startShowCar = (id) => {
- 
-  }
-
   //找到对应要打开的车辆信息
   const findText = (id) => {
     carRoutes.map((item) => {
@@ -157,17 +164,39 @@ export const ResultSide = (props) => {
   const closeTextResult = () => {
     setTextVisible(false)
   }
+
+  //到处文本结果
+  const downloadResults = () => {
+    httpUtil.downloadResultsFile({ finalSolutionId }).then((res) => {
+      console.log(res)
+      exportFile(res,'123')
+    })
+  }
   return (
-    <Fragment>
+    <div className="resultside_wrap">
       <Drawer
-        title="计算结果"
+        className="resultside_Drawer"
+        title={
+          <div className="drawer_title">
+            <div>计算结果</div>{' '}
+            <Button
+              type="primary"
+              icon={<DownloadOutlined />}
+              onClick={downloadResults}
+            >
+              导出
+            </Button>
+          </div>
+        }
         placement="right"
         onClose={closeSide}
         visible={sideVisible}
         autoFocus={false}
+        closable={false}
         mask={false}
         width="25vw"
         key="textResult"
+        zIndex={1000}
       >
         <Button
           type="primary"
@@ -227,6 +256,6 @@ export const ResultSide = (props) => {
           pagination={false}
         />
       </Modal>
-    </Fragment>
+    </div>
   )
 }

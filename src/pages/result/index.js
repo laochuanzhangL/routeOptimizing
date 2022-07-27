@@ -217,7 +217,7 @@ export const Result = () => {
           icon: new BMap.Icon(`${car}`, new BMap.Size(24, 24), {
             anchor: new BMap.Size(5, 10),
           }),
-          autoView: true,
+          autoView: false,
           enableRotation: false,
         })
       
@@ -358,6 +358,7 @@ export const Result = () => {
         sideVisible={sideVisible}
         setSideVisible={setSideVisible}
         trackAnis={trackAnis}
+        finalSolutionId={finalSolutionId}
         carRoutes={carRoutes}
         routeLoading={routeLoading}
       />

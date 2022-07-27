@@ -28,7 +28,6 @@ export const httpReq = (method, url, data, resType) => {
       },
       (err) => {
         // 错误在这统一处理
-        console.log(err)
         const status = err.response.status
         const errInfo = err.response.data.message || status
         // 将错误信息传递下去
@@ -37,7 +36,7 @@ export const httpReq = (method, url, data, resType) => {
         switch (status) {
           case 400:
             message.error(`用户未登录: ${errInfo}`)
-            window.location.href = '/';
+            window.location.href = '/'
             break
           case 401:
             message.error(`认证失败: ${errInfo}`)

@@ -1,23 +1,24 @@
-
-    .resultside_content{
+.resultside_Drawer {
+  .ant-drawer-header-title {
+    width: 100%;
+    .ant-drawer-title {
         width: 100%;
-        height: auto;
-        .title{
-            font-size: 20px;
-            text-align: center;
-            height: 40px;
-        }
-        .path{
-            white-space: pre;
-        }
+      .drawer_title {
+        font-size: 1vw;
+        width: 90%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
     }
-    .text_result{
-        .text_result_title{
-            display: flex;
-            justify-content: space-between;
-            .distance{
-                width: 200px;
-            }
-        }
+  }
+}
+.text_result {
+  .text_result_title {
+    display: flex;
+    justify-content: space-between;
+    .distance {
+      width: 200px;
     }
-   
+  }
+}

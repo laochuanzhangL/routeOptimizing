@@ -209,6 +209,7 @@ export const SelectSide = (props) => {
   const startExecute = () => {
     const query = { questionId, key: math }
     httpUtil.executeAlgorithm(query).then((res) => {
+      console.log(res.status);
       if (res.status === 0) {
         openNotification(res.data)
         setMathVisible(false)
