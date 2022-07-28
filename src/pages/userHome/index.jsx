@@ -1,6 +1,6 @@
 import React from 'react'
 import { Route, Switch } from 'react-router-dom'
-import './styles.scss'
+import './styles.less'
 import { Header, Footer } from './commponents'
 import Routes from './routes'
 export function UserHome() {

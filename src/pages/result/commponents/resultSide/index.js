@@ -1,7 +1,7 @@
 import React, { useState, useEffect, Fragment } from 'react'
 import { Drawer, Button, Table, message, Modal } from 'antd'
 import { RightOutlined, DownloadOutlined } from '@ant-design/icons'
-import './styles.scss'
+import './styles.less'
 import httpUtil from '../../../../utils/httpUtil'
 import { exportFile } from '../../../../utils/exportFile'
 export const ResultSide = (props) => {

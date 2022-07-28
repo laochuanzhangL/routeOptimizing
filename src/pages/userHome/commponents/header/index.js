@@ -1,5 +1,5 @@
 import React from 'react'
-import './styles.scss'
+import './styles.less'
 import { Menu, Modal } from 'antd'
 import { Link } from 'react-router-dom'
 import user from '../../../../assets/user.png'

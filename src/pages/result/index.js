@@ -7,7 +7,7 @@ import car from '../../assets/car.png'
 import redMark from '../../assets/redMark.png'
 import blueMark from '../../assets/blueMark.png'
 import { useParams } from 'react-router-dom'
-import './styles.scss'
+import './styles.less'
 export const Result = () => {
   const routeParams = useParams()
   const { finalSolutionId,questionId } = routeParams

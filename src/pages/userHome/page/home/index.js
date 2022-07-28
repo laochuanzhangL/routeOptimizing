@@ -11,7 +11,7 @@ import {
   notification,
 } from 'antd'
 import httpUtil from '../../../../utils/httpUtil'
-import './styles.scss'
+import './styles.less'
 import { Link } from 'react-router-dom'
 import dayjs from 'dayjs'
 export const Home = () => {

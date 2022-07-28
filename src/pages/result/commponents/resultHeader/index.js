@@ -2,7 +2,7 @@ import React from 'react'
 import { Input, Button } from 'antd'
 import { ImportOutlined } from '@ant-design/icons'
 import { useHistory } from 'react-router'
-import './styles.scss'
+import './styles.less'
 import { useState } from 'react'
 export const ResultHeader = (props) => {
   const { setCenter, sideVisible } = props
