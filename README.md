@@ -1,4 +1,5 @@
 
+[![OSCS Status](https://www.oscs1024.com/platform/badge/lionel-king11/routeOptimizing.svg?size=small)](https://www.oscs1024.com/project/lionel-king11/routeOptimizing?ref=badge_small)
 # 物流路径规划
 本项目为物流路径规划,此为前端代码
 
