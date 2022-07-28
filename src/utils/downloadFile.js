@@ -65,7 +65,7 @@ export const downloadFile = (method, url, data, resType) => {
             message.error(`未找到资源: ${errInfo}`)
             break
           case 500:
-            message.warning(`服务器未能处理: ${errInfo}`)
+            message.warning(`服务器未能处理`)
             break
           default:
             message.error(`错误信息: ${errInfo}`)

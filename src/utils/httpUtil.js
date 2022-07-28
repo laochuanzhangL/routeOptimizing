@@ -91,11 +91,14 @@ class HttpUtil {
   //获得结果的所有点
   getResultNodes = (params) =>
     httpReq('get', `/scheme/nodes/${params.finalSolutionId}`)
-
   //下载文本结果
-  downloadResultsFile = params =>
-    downloadFile('get', `/scheme/downloadResult?finalSolutionId=${params.finalSolutionId}`, {}, 'blob')
-  /**算法模块 */
+  downloadResultsFile = (params) =>
+    downloadFile(
+      'get',
+      `/scheme/downloadResult?finalSolutionId=${params.finalSolutionId}`,
+      {},
+      'blob'
+    )
 }
 
 export default new HttpUtil()
