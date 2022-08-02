@@ -1,10 +1,18 @@
 import React, { useRef, useState } from 'react'
-import { NavLink, Switch, Route, Redirect } from 'react-router-dom'
-import { Table, Button, message, Modal, Input, Popconfirm, Space,Form } from 'antd'
+import {
+  Table,
+  Button,
+  message,
+  Modal,
+  Input,
+  Popconfirm,
+  Space,
+  Form,
+} from 'antd'
 
 import './styles.less'
 
-export const Tddisplay = () => {
+export const ClientManage = () => {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(7)
   const [data, setData] = useState([
@@ -46,24 +54,19 @@ export const Tddisplay = () => {
 
     {
       title: '操作',
-      width: 260,
+      width: 200,
       dataIndex: 'action',
-      render: (_, record) =>
-        data.length >= 1 ? (
-          <div>
-            <Popconfirm
-              title="确定删除用户吗？"
-              okText="确定"
-              cancelText="取消"
-              key="userPopconfirm"
-              onConfirm={() => handleDelete(record)}
-            >
-              <Button danger type="primary" className="delete" key="userDelete">
-                删除用户
-              </Button>
-            </Popconfirm>
-          </div>
-        ) : null,
+      render: (_, record) => (
+        <Popconfirm
+          title="确定删除用户吗？"
+          okText="确定"
+          cancelText="取消"
+          key="userPopconfirm"
+          onConfirm={() => handleDelete(record)}
+        >
+          <a>删除</a>
+        </Popconfirm>
+      ),
     },
   ]
 
@@ -91,17 +94,17 @@ export const Tddisplay = () => {
     setVisible(false)
   }
   //创建文本域，提交完成后清空表单
-  const addFrom=useRef()
+  const addFrom = useRef()
 
   //增加表单提交函数
   const onFinish = (values) => {
     setVisible(false)
-    
+
     //尝试添加客户
     // const value={key:new Date(),...values}
     // setData([...data,value])
 
-    console.log(values);
+    console.log(values)
     addFrom.current.resetFields()
   }
 
@@ -111,19 +114,17 @@ export const Tddisplay = () => {
   }
 
   return (
-    <div className="tddisplay">
+    <div className="clientManage">
       <div className="content">
         <div className="table_header">
-          <Space size="middle">
-            <Button
-              type="primary"
-              className="table_btn"
-              key="addUser"
-              onClick={addUser}
-            >
-              添加客户
-            </Button>
-          </Space>
+          <Button
+            type="primary"
+            className="table_btn"
+            key="addUser"
+            onClick={addUser}
+          >
+            添加客户
+          </Button>
         </div>
         <div className="modal">
           <Modal
@@ -134,13 +135,13 @@ export const Tddisplay = () => {
             onCancel={handleCancel}
           >
             <Form
-              name="basic"  
+              name="basic"
               labelCol={{
                 span: 4,
               }}
               wrapperCol={{
                 span: 20,
-              }}       
+              }}
               ref={addFrom}
               autoComplete="off"
               onFinish={onFinish}
@@ -197,7 +198,7 @@ export const Tddisplay = () => {
                   span: 18,
                 }}
               >
-                <Button type="primary" htmlType="submit" block >
+                <Button type="primary" htmlType="submit" block>
                   添加
                 </Button>
               </Form.Item>

@@ -89,7 +89,7 @@ export const SelectNodes = (props) => {
     })
     setSearchNodes([...arr])
   }
-  const detailSearch=(e)=>{
+  const detailSearch = (e) => {
     const keyWord = e.target.value
     const arr = []
     nodes.map((item) => {
@@ -317,7 +317,7 @@ export const SelectNodes = (props) => {
           </Button>,
         ]}
       >
-          <div className="detail_search">
+        <div className="detail_search">
           <Search
             key="detailSearch"
             placeholder="请输入目标编号/名称/地址/经纬度"

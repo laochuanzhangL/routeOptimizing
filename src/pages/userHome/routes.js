@@ -1,4 +1,4 @@
-import { Home, Percenter, Msgcenter, Tddisplay } from './page/index'
+import { Home, Percenter, Msgcenter, ClientManage } from './page/index'
 import { NotFound } from '../../commponents'
 const Routes = [
   {
@@ -10,8 +10,8 @@ const Routes = [
     component: Msgcenter,
   },
   {
-    path: '/tddisplay',
-    component: Tddisplay,
+    path: '/clientManage',
+    component: ClientManage,
   },
   {
     path: '/',

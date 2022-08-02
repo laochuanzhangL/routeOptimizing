@@ -266,7 +266,7 @@ export const Home = () => {
                   width: '500px',
                 }}
               >
-                <Input bordered="false" placeholder="请输入项目名称" />
+                <Input bordered="false" placeholder="请输入项目名称" key="itemInput" />
               </Form.Item>
               <Form.Item
                 style={{
@@ -274,7 +274,7 @@ export const Home = () => {
                   justifyContent: 'center',
                 }}
               >
-                <Button type="primary" htmlType="submit" block>
+                <Button type="primary" htmlType="submit" block  key="submitItem">
                   添加
                 </Button>
               </Form.Item>

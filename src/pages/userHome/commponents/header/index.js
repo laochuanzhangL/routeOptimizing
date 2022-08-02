@@ -47,8 +47,8 @@ export const Header = () => {
             <Menu.Item key="home" icon={<HomeOutlined />}>
               <Link to="/user">首页</Link>
             </Menu.Item>
-            <Menu.Item key="tddisplay" icon={<AppstoreOutlined />}>
-              <Link to="/user/tddisplay"> 客户管理</Link>
+            <Menu.Item key="clientManage" icon={<AppstoreOutlined />}>
+              <Link to="/user/clientManage"> 客户管理</Link>
             </Menu.Item>
           </Menu>
           <div className="header_right">
