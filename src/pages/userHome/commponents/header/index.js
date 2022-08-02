@@ -48,7 +48,7 @@ export const Header = () => {
               <Link to="/user">首页</Link>
             </Menu.Item>
             <Menu.Item key="tddisplay" icon={<AppstoreOutlined />}>
-              <Link to="/user/tddisplay">二维展示</Link>
+              <Link to="/user/tddisplay"> 客户管理</Link>
             </Menu.Item>
           </Menu>
           <div className="header_right">
