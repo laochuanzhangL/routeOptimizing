@@ -2,17 +2,16 @@ import axios from 'axios'
 import React from 'react'
 import { useState, useEffect } from 'react'
 import { Map, Marker, NavigationControl, InfoWindow } from 'react-bmapgl'
+import { AddClientTables, AddClientHeader } from './commponents/index'
 import { message } from 'antd'
-import { SelectHeader, SelectNodes, SelectSide } from './commponents/index'
 import './styles.less'
 import { useParams } from 'react-router-dom'
 import { myDebounce } from '../../utils/myDebounce'
 import httpUtil from '../../utils/httpUtil'
-export const SelectAddress = () => {
+export const AddClientMap = () => {
   const routeParams = useParams()
-  const { questionId } = routeParams
+  const { userId } = routeParams
   const [center, setCenter] = useState({ lng: 116.402544, lat: 39.928216 })
-  const [haveCenter, setHaveCenter] = useState(false)
   const [nodes, setNodes] = useState([])
   const [windowInfo, setWindowInfo] = useState([])
   const BMapGL = window.BMapGL
@@ -20,20 +19,11 @@ export const SelectAddress = () => {
     getNodes()
   }, [])
   const getNodes = () => {
-    const formdata = { questionId }
+    const formdata = { userId }
     httpUtil.getQuestionsNodes(formdata).then((res) => {
       if (res.data.length > 0) {
         getBeginCenter([...res.data])
         setNodes([...res.data])
-        for (let node of res.data) {
-          if (node.isCenter) {
-            setHaveCenter(true)
-            break
-          }
-          setHaveCenter(false)
-        }
-      } else {
-        setHaveCenter(false)
       }
     })
   }
@@ -43,35 +33,70 @@ export const SelectAddress = () => {
     if (nodes.length) {
       for (let item of nodes) {
         const { isCenter } = item
-        if (isCenter) {
-          const { lat, lng } = item
-          let point = new BMapGL.Point(lng, lat)
-          setCenter(point)
-          break
-        }
+        const { lat, lng } = item
+        let point = new BMapGL.Point(lng, lat)
+        setCenter(point)
+        break
       }
     }
   }
 
+  //地图上面点击站点
+  const addNode = (e) => {
+    const { lng, lat } = e.latlng
+    //逆地址编码，不能携带cookie，故单独写请求
+    //高德地图逆地址编码得到的地址更加详细，但是经纬度有略微偏差 故做了加减法
+    axios
+      .get(
+        `https://restapi.amap.com/v3/geocode/regeo?location=${lng - 0.00658},${
+          lat - 0.00574
+        }&key=e8a9a816ff9e7b6b2a8d365bcb62c3be&radius=1&extensions=all`
+      )
+      .then((res) => {
+        try {
+          if (res.data.regeocode.formatted_address.length) {
+            const nodeAddress = res.data.regeocode.formatted_address
+            const node = {
+              userId,
+              nodeAddress,
+              lng,
+              lat,
+              questionName: ' ',
+              nodeName: nodeAddress,
+            }
+            httpUtil.addClient(node).then((res) => {
+              if (res.status == 9999) {
+                getNodes()
+              } else {
+                message.warn(res.msg)
+              }
+            })
+          } else {
+            message.warn('请选中国境内地址')
+          }
+        } catch(error) {
+          message.error('今日地图选点份额已经使用完毕')
+        }
+      })
+  }
+
   return (
     <div className="selectAddress_wrap">
-      <SelectHeader
+      <AddClientHeader
         setCenter={setCenter}
-        questionId={questionId}
+        userId={userId}
         getNodes={getNodes}
       />
-      <SelectNodes
+      <AddClientTables
         nodes={nodes}
         setNodes={setNodes}
-        setHaveCente={setHaveCenter}
-        questionId={questionId}
+        userId={userId}
         getNodes={getNodes}
       />
-      <SelectSide questionId={questionId} haveCenter={haveCenter} />
       <Map
         center={center}
         zoom="11"
-        // onClick={addNode}
+        onClick={addNode}
         enableScrollWheelZoom
         style={{
           position: 'relative',
@@ -80,7 +105,7 @@ export const SelectAddress = () => {
       >
         {/*   点击后地图上添加Marker */}
         {nodes.map((item) => {
-          const { lat, lng, nodeAddress, nodeName, isCenter, nodeId } = item
+          const { lat, lng, id, nodeAddress, nodeName, isCenter, nodeId } = item
           return (
             <div>
               <Marker

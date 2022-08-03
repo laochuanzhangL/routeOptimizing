@@ -8,33 +8,53 @@
   .content {
     width: 75%;
     height: 92%;
-  }
-  .table_header {
-    width: 100%;
-    height: 48px;
-    display: flex;
-    align-items: center;
-    .table_btn {
-      width: 90px;
-      height: 100%;
-      font-size: 15px;
-      text-align: center;
-      border-radius: 4px;
+    .table_header_content {
+      width: 100%;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      .user_search {
+        width: 40%;
+        height: 40px;
+        .ant-input,
+        .ant-input-group,
+        .ant-input-search-button {
+          height: 40px;
+        }
+      }
+      .btn_wrap {
+        height: 100%;
+        width: 190px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        .ant-btn {
+          width: 90px;
+          height: 40px;
+          font-size: 15px;
+          text-align: center;
+          border-radius: 4px;
+        }
+      }
     }
-  }
-  .table_wrap {
-    width: 100%;
-    height: 93%;
-    .nomodify {
-      cursor: no-drop;
-    }
-    .ant-empty {
-      min-height: 48vh !important;
-      max-height: 350px !important;
-      padding-top: 100px !important;
-    }
-    .delete {
-      margin-left: 20px !important;
+    .table_wrap {
+      width: 100%;
+      height: 93%;
+      .table_footer {
+        margin-top: 5px;
+      }
+      .nomodify {
+        cursor: no-drop;
+      }
+      .ant-empty {
+        min-height: 48vh !important;
+        max-height: 350px !important;
+        padding-top: 100px !important;
+      }
+      .delete {
+        margin-left: 20px !important;
+      }
     }
   }
 }

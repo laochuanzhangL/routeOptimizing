@@ -1,10 +1,10 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import './styles.less'
 import { Menu, Modal } from 'antd'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import user from '../../../../assets/user.png'
 import { useHistory } from 'react-router'
-import { useState} from 'react'
+import { useState } from 'react'
 import {
   ImportOutlined,
   MailOutlined,
@@ -16,12 +16,22 @@ import httpUtil from '../../../../utils/httpUtil'
 const { SubMenu } = Menu
 const { confirm } = Modal
 export const Header = () => {
+  const { pathname } = useLocation()
   const history = useHistory()
   const [current, setCurrent] = useState('home')
+  //使刷新后的current正常显示
+  useEffect(() => {
+    getPathname()
+  },[current])
+
+  const getPathname=()=>{
+    let result=pathname.substring(6)
+    if(result.length)setCurrent(result)
+  }
   const handleClick = (e) => {
     setCurrent(e.key)
   }
-  const logOut=()=> {
+  const logOut = () => {
     confirm({
       title: '确认要退出登陆?',
       okText: '确认',

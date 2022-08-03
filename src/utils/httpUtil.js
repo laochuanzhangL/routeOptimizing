@@ -31,10 +31,6 @@ class HttpUtil {
     )
 
   /**地图选点模块 */
-  //点击地图添加选点
-  addNode = (params) => httpReq('post', '/node/newNode', params)
-  //提交所有选点
-  uploadNodes = (params) => httpReq('post', '/node/newNodeBatch', params)
   //删除所有选点
   deleteAllNodes = (params) =>
     httpReq('delete', `/node/clearNodes?questionId=${params.questionId}`)
@@ -45,13 +41,7 @@ class HttpUtil {
     httpReq('get', `/node/getQuestionNodes?questionId=${params.questionId}`)
   //修改点信息
   updateNode = (params) => httpReq('patch', '/node/updateNode', params)
-  //文件上传导入选点
-  nodesFileUpload = (params) =>
-    uploadFile(
-      'post',
-      `/node/excelNodeInfo/${params.get('questionId')}`,
-      params
-    )
+
   //下载文件模板
   downloadNodesFile = () => downloadFile('get', '/node/download', {}, 'blob')
   /**算法模块 */
@@ -98,6 +88,16 @@ class HttpUtil {
       `/scheme/downloadResult?finalSolutionId=${params.finalSolutionId}`,
       {},
       'blob'
+    )
+  /**客户模块 */
+  //点击地图添加选点
+  addClient = (params) => httpReq('post', '/node/newNode', params)
+  //文件导入客户
+  clientsFileUpload = (params) =>
+    uploadFile(
+      'post',
+      `/node/excelClientNodeInfo/${params.get('userId')}`,
+      params
     )
 }
 

@@ -209,7 +209,7 @@ export const SelectSide = (props) => {
   const startExecute = () => {
     const query = { questionId, key: math }
     httpUtil.executeAlgorithm(query).then((res) => {
-      console.log(res.status);
+      console.log(res.status)
       if (res.status === 0) {
         openNotification(res.data)
         setMathVisible(false)
@@ -235,7 +235,7 @@ export const SelectSide = (props) => {
     )
     notification.open({
       message: '计算成功',
-      description: '可点击以下按钮前往查看，本框4秒后自动消失',
+      description: '可点击以下按钮前往查看，提示4秒后自动消失',
       btn,
       key,
       duration: 4,

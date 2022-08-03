@@ -14,6 +14,7 @@ const instance = axios.create({
   baseURL: '/RoutePlanSystem',
   withCredentials: true,
 })
+
 // 添加返回拦截器，直接获取返回内容的data
 instance.interceptors.response.use((res) => {
   return res
@@ -36,12 +37,12 @@ export const uploadFile = (method, url, data, resType) => {
         const status = err.response.status
         const errInfo = err.response.data.message || status
         // 将错误信息传递下去
-        reject({ status, errInfo })
+        reject({ status, errInfo }) 
         // 根据状态码做提示处理
         switch (status) {
           case 400:
             message.error(`用户未登录: ${errInfo}`)
-            window.location.href = '/';
+            window.location.href = '/'
             break
           case 401:
             message.error(`认证失败: ${errInfo}`)

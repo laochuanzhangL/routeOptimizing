@@ -1,23 +1,19 @@
 import React from 'react'
-import { Input, Button, Modal, Upload, message, Spin } from 'antd'
+import { Input, Button, Upload, message, Modal, Table } from 'antd'
 import {
   CloudUploadOutlined,
   ImportOutlined,
-  InboxOutlined,
+  UserAddOutlined,
 } from '@ant-design/icons'
 import { useHistory } from 'react-router'
 import { useState } from 'react'
 import httpUtil from '../../../utils/httpUtil'
-import { exportFile } from '../../../utils/exportFile'
 export const SelectHeader = (props) => {
-  const [uploadVisible, setUploadVisible] = useState(false)
-  const [fileList, setFileList] = useState([])
-  const [loading, setLoading] = useState(false)
+  const [clientAddVisible, setClientAddVisible] = useState(true)
   const { setCenter, questionId, getNodes } = props
   const history = useHistory()
   const BMapGL = window.BMapGL
   const { Search } = Input
-  const { Dragger } = Upload
   //改变地图中心位置
   const onSearch = (e) => {
     //不能携带cookie，故单独写请求
@@ -41,54 +37,9 @@ export const SelectHeader = (props) => {
     history.push('/user')
   }
 
-  const uploadProps = {
-    fileList: fileList,
-    beforeUpload(info) {
-      //文件类型校验
-      const fileType = info.name.split('.').pop()
-      if (fileType !== 'xlsx' && fileType !== 'xls') {
-        message.error(`上传失败：上传文件格式非excel文件格式`)
-      }
-      return false
-    },
-    progress: {},
-    onChange(info) {
-      const fileType = info.file.name.split('.').pop()
-      if (fileType === 'xlsx' || fileType === 'xls') {
-        setFileList(info.fileList.slice(-1)) //限制只上传一个文件
-        info.file.status = 'done' //更改文件状态
-      }
-    },
-  }
-  const downloadFile = () => {
-    httpUtil.downloadNodesFile().then((res) => {
-      exportFile(res, '选点模板文件')
-    })
-  }
- 
+  const changeShowClients = () => {}
 
-  const handleUpload = () => {
-    if (fileList && fileList.length) {
-      //检验是否有上传文件
-      let formData = new FormData()
-      formData.append('file', fileList[0].originFileObj)
-      formData.append('questionId', questionId)
-      setLoading(true)
-      httpUtil.nodesFileUpload(formData).then((res) => {
-        setLoading(false)
-        if (res.status === 200) {
-          message.success('文件上传成功')
-          setUploadVisible(false)
-          setFileList([])
-          getNodes()
-        } else {
-          message.error(res.msg)
-        }
-      })
-    } else {
-      message.error('请上传文件后再提交！')
-    }
-  }
+  const submitClients = () => {}
   return (
     <div className="selectAddress_header">
       <div className="search_wrap">
@@ -106,11 +57,11 @@ export const SelectHeader = (props) => {
           type="primary"
           size="large"
           onClick={() => {
-            setUploadVisible(true)
+            setClientAddVisible(true)
           }}
-          icon={<CloudUploadOutlined style={{ fontSize: '20px' }} />}
+          icon={<UserAddOutlined style={{ fontSize: '20px' }} />}
         >
-          文件上传
+          添加用户
         </Button>
         <Button
           type="primary"
@@ -122,46 +73,46 @@ export const SelectHeader = (props) => {
         </Button>
       </div>
       <Modal
-        key="nodesUploadModal"
-        visible={uploadVisible}
-        //onOk={}
+        key="clientAddModal"
+        visible={clientAddVisible}
+        title="添加客户"
+        // okText="确认"
+        // cancelText="取消"
+        // onOk={submitClients}
         onCancel={() => {
-          if (loading) {
-            message.warn('文件正在上传，请稍后')
-          } else setUploadVisible(false)
+          setClientAddVisible(false)
         }}
-        title="文件上传"
-        className="node_upload_modal"
-        width="400px"
-        style={{
-          minWidth: '400px',
-        }}
-        height="300px"
         footer={[
-          <Button type="link" onClick={downloadFile}>
-            模板下载
+          <Button
+            type="primary"
+            style={{ marginRight: '730px' }}
+            key="deleteall"
+            onClick={changeShowClients}
+          >
+            显示所有
           </Button>,
-          <div>
-            {loading ? (
-              <Spin
-                className="spin"
-                style={{ marginTop: '6px', marginRight: '15px' }}
-              />
-            ) : (
-              <Button type="primary" onClick={handleUpload}>
-                确定
-              </Button>
-            )}
-          </div>,
+          <Button
+            type="Link"
+            key="delete"
+            onClick={() => {
+              setClientAddVisible(false)
+            }}
+          >
+            取消
+          </Button>,
+          <Button type="primary" key="ok" onClick={submitClients}>
+            确认
+          </Button>,
         ]}
+        className="client_add_modal"
+        width="1000px"
+        style={{
+          minWidth: '800px',
+          minHeight: '600px',
+        }}
+        height="600px"
       >
-        <Dragger {...uploadProps}>
-          <p className="ant-upload-drag-icon">
-            <InboxOutlined />
-          </p>
-          <p className="ant-upload-text">单击或拖动文件到此区域上传</p>
-          <p className="ant-upload-hint">仅支持EXCEL文件</p>
-        </Dragger>
+        <Table></Table>
       </Modal>
     </div>
   )

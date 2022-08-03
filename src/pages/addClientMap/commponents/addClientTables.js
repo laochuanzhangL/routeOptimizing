@@ -2,14 +2,14 @@ import React from 'react'
 import { useState, useEffect } from 'react'
 import { Table, Input, Button, Popconfirm, message, Space, Modal } from 'antd'
 import httpUtil from '../../../utils/httpUtil'
-export const SelectNodes = (props) => {
+export const AddClientTables = (props) => {
   const [centerVisible, setCenterVisible] = useState(false)
   const [detailsVisible, setDetailsVisible] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState([])
   const [detailSelectedRowKeys, setDetailSelectedRowKeys] = useState([])
   const [searchNodes, setSearchNodes] = useState([])
   const [page, setPage] = useState(1)
-  const { nodes, setNodes, questionId, getNodes } = props
+  const { nodes, setNodes, userId, getNodes } = props
   const { Search } = Input
   const nodeColumns = [
     {
@@ -50,7 +50,7 @@ export const SelectNodes = (props) => {
     {
       title: '编号',
       dataIndex: 'nodeId',
-      width: 120,
+      width: 70,
       render: (render) => {
         return render
       },
@@ -108,7 +108,7 @@ export const SelectNodes = (props) => {
   }
   const handleDelete = (e) => {
     const { nodeId } = e
-    const query = { nodeId, questionId }
+    const query = { nodeId, userId }
     httpUtil.deleteNode(query).then((res) => {
       if (res.status == 9999) {
         message.success('删除选点成功')
@@ -135,7 +135,6 @@ export const SelectNodes = (props) => {
 
   const cancelDetail = () => {
     setDetailsVisible(false)
-
     setSearchNodes([])
   }
   //查看详细页面的删除
@@ -155,7 +154,7 @@ export const SelectNodes = (props) => {
   }
   //清空所有点
   const deleteAll = () => {
-    const params = { questionId }
+    const params = { userId }
     if (confirm('是否要清空所有站点')) {
       const result = httpUtil.deleteAllNodes(params)
       console.log(result)
@@ -226,13 +225,9 @@ export const SelectNodes = (props) => {
     return (
       <div className="node_footer">
         <div className="button_wrap">
-          <div></div>
-          <Button type="primary" onClick={selectCenter}>
-            选择中心点
+          <Button type="primary" onClick={openDetails}>
+            查看详细
           </Button>
-        </div>
-        <div className="details">
-          <a onClick={openDetails}>查看详细</a>
         </div>
       </div>
     )
