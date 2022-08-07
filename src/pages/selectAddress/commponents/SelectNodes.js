@@ -302,16 +302,16 @@ export const SelectNodes = (props) => {
         }}
         height="600px"
         footer={[
-          <Button
-            type="Link"
-            style={{ marginRight: '730px' }}
-            key="deleteall"
-            onClick={deleteAll}
-          >
+          <Button type="Link" key="deleteall" onClick={deleteAll}>
             清空所有
           </Button>,
-          <Button type="primary" key="delete" onClick={deleteSelect}>
-            删除
+          <Button
+            type="primary"
+            key="delete"
+            onClick={deleteSelect}
+            style={{ marginRight: '700px' }}
+          >
+            删除已选
           </Button>,
           <Button type="primary" key="ok" onClick={cancelDetail}>
             确认

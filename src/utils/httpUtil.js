@@ -91,7 +91,7 @@ class HttpUtil {
     )
   /**客户模块 */
   //点击地图添加选点
-  addClient = (params) => httpReq('post', '/node/newNode', params)
+  addClient = (params) => httpReq('post', '/node/newClientNode', params)
   //文件导入客户
   clientsFileUpload = (params) =>
     uploadFile(
@@ -99,6 +99,12 @@ class HttpUtil {
       `/node/excelClientNodeInfo/${params.get('userId')}`,
       params
     )
+  //获取所有客户
+  getAllClients = () => httpReq('get', `/node/getClientNodes`)
+  //删除单个用户
+  deleteClients = (params) =>
+    httpReq('delete', `/node/deleteClientNode?nodeId=${params.nodeId}`)
+  //添加单个用户
 }
 
 export default new HttpUtil()

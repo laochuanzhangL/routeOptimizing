@@ -22,11 +22,11 @@ export const Header = () => {
   //使刷新后的current正常显示
   useEffect(() => {
     getPathname()
-  },[current])
+  }, [current])
 
-  const getPathname=()=>{
-    let result=pathname.substring(6)
-    if(result.length)setCurrent(result)
+  const getPathname = () => {
+    let result = pathname.substring(6)
+    if (result.length) setCurrent(result)
   }
   const handleClick = (e) => {
     setCurrent(e.key)

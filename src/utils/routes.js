@@ -16,7 +16,7 @@ const Routes = [
     component: Result,
   },
   {
-    path: '/addclientmap/:userId',
+    path: '/addclientmap',
     component: AddClientMap,
   },
   {

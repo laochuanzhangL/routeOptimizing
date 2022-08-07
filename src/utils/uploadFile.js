@@ -48,7 +48,7 @@ export const uploadFile = (method, url, data, resType) => {
             message.error(`认证失败: ${errInfo}`)
             break
           case 403:
-            message.error(`未授权: ${errInfo}`)
+            message.error(`未授权:请重新登录`)
             setTimeout(() => {
               window.location.href = '/'
             }, 1000)

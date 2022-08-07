@@ -97,13 +97,13 @@ export const SelectAddress = () => {
                   const addWindowInfo = myDebounce(handle, 300, true)
                   addWindowInfo()
                 }}
-                onMouseout={(e) => {
-                  const handle = () => {
-                    return setWindowInfo([])
-                  }
-                  const clearWindowInfo = myDebounce(handle, 2000, false)
-                  clearWindowInfo()
-                }}
+                // onMouseout={(e) => {
+                //   const handle = () => {
+                //     return setWindowInfo([])
+                //   }
+                //   const clearWindowInfo = myDebounce(handle, 2000, false)
+                //   clearWindowInfo()
+                // }}
               />
             </div>
           )

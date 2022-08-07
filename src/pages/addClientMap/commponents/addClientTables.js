@@ -9,7 +9,7 @@ export const AddClientTables = (props) => {
   const [detailSelectedRowKeys, setDetailSelectedRowKeys] = useState([])
   const [searchNodes, setSearchNodes] = useState([])
   const [page, setPage] = useState(1)
-  const { nodes, setNodes, userId, getNodes } = props
+  const { nodes, setNodes, getNodes ,setCenter,setWindowInfo} = props
   const { Search } = Input
   const nodeColumns = [
     {
@@ -21,8 +21,8 @@ export const AddClientTables = (props) => {
       },
     },
     {
-      title: '详细地址',
-      dataIndex: 'nodeAddress',
+      title: '客户名称',
+      dataIndex: 'nodeName',
       render: (render) => {
         return render
       },
@@ -32,16 +32,22 @@ export const AddClientTables = (props) => {
       dataIndex: 'action',
       width: 70,
       render: (_, record) => (
-        <Space size="middle">
-          <Popconfirm
-            title="是否删除?"
-            okText="确定"
-            cancelText="取消"
-            onConfirm={() => handleDelete(record)}
-          >
-            <a>删除</a>
-          </Popconfirm>
-        </Space>
+        <span
+          style={{ color: '#1890ff', cursor: 'pointer', display: 'block' }}
+          onClick={() => {
+            setWindowInfo([record])
+          }}
+        >
+          跳转
+        </span>
+        // {/* <Popconfirm
+        //   title="是否删除?"
+        //   okText="确定"
+        //   cancelText="取消"
+        //   onConfirm={() => handleDeleteClient(record.nodeId)}
+        // >
+        //   <a>删除</a>
+        // </Popconfirm> */}
       ),
     },
   ]
@@ -50,7 +56,7 @@ export const AddClientTables = (props) => {
     {
       title: '编号',
       dataIndex: 'nodeId',
-      width: 70,
+      width: 100,
       render: (render) => {
         return render
       },
@@ -70,25 +76,29 @@ export const AddClientTables = (props) => {
       },
     },
   ]
+  useEffect(() => {
+    getClients()
+  }, [])
 
+  //获取所有客户
+  const getClients = () => {
+    httpUtil.getAllClients().then((res) => {
+      if (res.status == 1000) {
+        setNodes(res.data)
+      }
+    })
+  }
   useEffect(() => {
     getselectedRowKeys()
   }, [nodes])
 
-  const centerSearch = (e) => {
-    const keyWord = e.target.value
-    const arr = []
-    nodes.map((item) => {
-      for (const [key, value] of Object.entries(item)) {
-        const str = value + ''
-        if (str.indexOf(keyWord) >= 0) {
-          arr.push(item)
-          break
-        }
-      }
-    })
-    setSearchNodes([...arr])
-  }
+  // //改变地图展示中心点
+  // const changeCenter = (e) => {
+  //   const { lat, lng } = e
+  //   console.log(e)
+  
+  // }
+
   const detailSearch = (e) => {
     const keyWord = e.target.value
     const arr = []
@@ -108,7 +118,7 @@ export const AddClientTables = (props) => {
   }
   const handleDelete = (e) => {
     const { nodeId } = e
-    const query = { nodeId, userId }
+    const query = { nodeId }
     httpUtil.deleteNode(query).then((res) => {
       if (res.status == 9999) {
         message.success('删除选点成功')
@@ -122,22 +132,11 @@ export const AddClientTables = (props) => {
     })
   }
 
-  //选择中心点
-  const selectCenter = () => {
-    setCenterVisible(true)
-    setSearchNodes([])
-  }
-  //取消上传
-  const hideCenterModal = () => {
-    setCenterVisible(false)
-    setSearchNodes([])
-  }
-
   const cancelDetail = () => {
     setDetailsVisible(false)
     setSearchNodes([])
   }
-  //查看详细页面的删除
+  // 查看详细页面的删除
   const deleteSelect = (e) => {
     if (detailSelectedRowKeys.length == 0) {
       message.warn('请至少选择一个点')
@@ -152,9 +151,19 @@ export const AddClientTables = (props) => {
       }
     }
   }
+  //处理删除函数
+  const handleDeleteClient = (nodeId) => {
+    let parmas = { nodeId }
+    httpUtil.deleteClients(parmas).then((res) => {
+      if (res.status == 9999) {
+        getClients()
+        message.success('删除成功')
+      } else message.error('删除失败')
+    })
+  }
   //清空所有点
   const deleteAll = () => {
-    const params = { userId }
+    const params = { userId: 1 }
     if (confirm('是否要清空所有站点')) {
       const result = httpUtil.deleteAllNodes(params)
       console.log(result)
@@ -246,67 +255,31 @@ export const AddClientTables = (props) => {
         footer={nodeFooter}
         scroll={{ y: 300 }}
       />
-      {/*  中心点的Modal */}
-      <Modal
-        keyboard
-        title="选择中心点"
-        key="centerModal"
-        visible={centerVisible}
-        onOk={upload}
-        width="1000px"
-        style={{
-          minWidth: '800px',
-          minHeight: '600px',
-        }}
-        height="600px"
-        onCancel={hideCenterModal}
-        okText="确认"
-        className="center_modal"
-        cancelText="取消"
-      >
-        <div className="center_search">
-          <Search
-            key="centerSearch"
-            placeholder="请输入目标编号/名称/地址/经纬度"
-            onChange={centerSearch}
-            enterButton
-          />
-        </div>
-        <Table
-          rowSelection={rowSelection}
-          rowKey={(record) => record.nodeId}
-          key="centerTable"
-          columns={detailsColumns}
-          dataSource={searchNodes.length ? searchNodes : nodes}
-          scroll={{ y: 500 }}
-          pagination={false}
-        />
-      </Modal>
 
       {/* 查看详细的Modal */}
       <Modal
         visible={detailsVisible}
         onCancel={cancelDetail}
         title="站点详细"
-        key="detailModal"
+        key="clientDetailsModal"
         className="details_modal"
         width="1000px"
         style={{
           minWidth: '1000px',
-          minHeight: '600px',
+          minHeight: '500px',
         }}
-        height="600px"
+        height="auto"
         footer={[
-          <Button
-            type="Link"
-            style={{ marginRight: '730px' }}
-            key="deleteall"
-            onClick={deleteAll}
-          >
+          <Button type="Link" key="deleteall" onClick={deleteAll}>
             清空所有
           </Button>,
-          <Button type="primary" key="delete" onClick={deleteSelect}>
-            删除
+          <Button
+            type="primary"
+            key="delete"
+            onClick={deleteSelect}
+            style={{ marginRight: '700px' }}
+          >
+            删除已选
           </Button>,
           <Button type="primary" key="ok" onClick={cancelDetail}>
             确认
@@ -315,7 +288,7 @@ export const AddClientTables = (props) => {
       >
         <div className="detail_search">
           <Search
-            key="detailSearch"
+            key="clientDetailsSearch"
             placeholder="请输入目标编号/名称/地址/经纬度"
             onChange={detailSearch}
             enterButton
@@ -323,14 +296,15 @@ export const AddClientTables = (props) => {
         </div>
         <Table
           bordered
-          key="detailTable"
+          scroll={{ y: '50vh' }}
+          key="clientDetailsTable"
           dataSource={searchNodes.length ? searchNodes : nodes}
           rowSelection={detailRowSelection}
           columns={detailsColumns}
           rowKey={(record) => {
             return record.nodeId
           }}
-          height="600px"
+          height="50vh"
           pagination={{
             total: nodes.length,
             defaultPageSize: 8,

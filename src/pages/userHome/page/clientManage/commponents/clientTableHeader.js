@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useHistory } from 'react-router-dom'
-import { Button, message, Modal, Input, Upload,Spin } from 'antd'
+import { Button, message, Modal, Input, Upload, Spin } from 'antd'
 import { exportFile } from '../../../../../utils/exportFile'
 import httpUtil from '../../../../../utils/httpUtil'
 import { InboxOutlined } from '@ant-design/icons'
@@ -44,9 +44,7 @@ export const ClientTableHeader = (props) => {
       //检验是否有上传文件
       let formData = new FormData()
       formData.append('file', fileList[0].originFileObj)
-      formData.append('userId', userId)
       setLoading(true)
-      console.log(userId)
       httpUtil.clientsFileUpload(formData).then((res) => {
         setLoading(false)
         if (res.status === 200) {
@@ -77,9 +75,9 @@ export const ClientTableHeader = (props) => {
         <Button
           type="primary"
           className="mapAddBtn"
-          key="addUser"
+          key="addClient"
           onClick={() => {
-            history.push(`/addClientMap/${userId}`)
+            history.push(`/addClientMap`)
           }}
         >
           地图添加
@@ -87,7 +85,7 @@ export const ClientTableHeader = (props) => {
         <Button
           type="primary"
           className="fileAddBtn"
-          key="addUser"
+          key="uploadClients"
           onClick={() => {
             setUploadVisible(true)
           }}

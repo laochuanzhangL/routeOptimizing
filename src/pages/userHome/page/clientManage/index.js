@@ -1,11 +1,6 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
-import {
-  Table,
-  Popconfirm,
-  Input,
-} from 'antd'
-
+import { Table, Popconfirm, Input, Pagination, message } from 'antd'
 import './styles.less'
 import httpUtil from '../../../../utils/httpUtil'
 import { ClientTableHeader } from './commponents/clientTableHeader'
@@ -14,67 +9,35 @@ export const ClientManage = () => {
   const [clients, setClients] = useState([])
   const [page, setPage] = useState(1)
   const history = useHistory()
-  const [pageSize, setPageSize] = useState(10)
-  const [data, setData] = useState([
-    {
-      key: '1',
-      number: '1',
-      userName: '我的名字',
-      longitude: '1,2',
-      address: '北京',
-    },
-    {
-      key: '1',
-      number: '1',
-      userName: '我的名字',
-      longitude: '1,2',
-      address: '北京',
-    },
-    {
-      key: '1',
-      number: '1',
-      userName: '我的名字',
-      longitude: '1,2',
-      address: '北京',
-    },
-    {
-      key: '1',
-      number: '1',
-      userName: '我的名字',
-      longitude: '1,2',
-      address: '北京',
-    },
-    {
-      key: '1',
-      number: '1',
-      userName: '我的名字',
-      longitude: '1,2',
-      address: '北京',
-    },
-  ])
+  const [pageSize, setPageSize] = useState(50)
 
   //列
   const columns = [
     {
       title: '编号',
-      dataIndex: 'number',
+      dataIndex: 'nodeId',
+      width: 100,
     },
     {
       title: '客户名称',
-      dataIndex: 'userName',
+      dataIndex: 'nodeName',
     },
     {
-      title: '经纬度',
+      title: '经纬度(经度/纬度)',
       dataIndex: 'longitude',
+      render: (_, record) => {
+        const { lat, lng } = record
+        return lng + '/' + lat
+      },
     },
     {
       title: '详细地址',
-      dataIndex: 'address',
+      dataIndex: 'nodeAddress',
     },
 
     {
       title: '操作',
-      width: 200,
+      width: 100,
       dataIndex: 'action',
       render: (_, record) => (
         <Popconfirm
@@ -82,7 +45,7 @@ export const ClientManage = () => {
           okText="确定"
           cancelText="取消"
           key="userPopconfirm"
-          onConfirm={() => handleDelete(record)}
+          onConfirm={() => handleDelete(record.nodeId)}
         >
           <a>删除</a>
         </Popconfirm>
@@ -90,9 +53,17 @@ export const ClientManage = () => {
     },
   ]
 
-  //获取所有客户
-  const getClients=()=>{
+  useEffect(() => {
+    getClients()
+  },[pageSize])
 
+  //获取所有客户
+  const getClients = () => {
+    httpUtil.getAllClients().then((res) => {
+      if (res.status == 1000) {
+        setClients(res.data)
+      }
+    })
   }
 
   //单选框变化函数
@@ -106,14 +77,25 @@ export const ClientManage = () => {
     },
   }
   //处理删除函数
-  const handleDelete = (e) => {
-    console.log(e)
+  const handleDelete = (nodeId) => {
+    let parmas = { nodeId }
+    httpUtil.deleteClients(parmas).then((res) => {
+      if (res.status == 9999) {
+        getClients()
+        message.success('删除成功')
+      } else message.error('删除失败')
+    })
   }
 
   return (
     <div className="clientManage">
       <div className="content">
-       <ClientTableHeader userId={userId} getClients={getClients}  clients={clients} setClients={setClients}/>
+        <ClientTableHeader
+          userId={userId}
+          getClients={getClients}
+          clients={clients}
+          setClients={setClients}
+        />
         <div className="table_wrap">
           <Table
             bordered
@@ -122,12 +104,20 @@ export const ClientManage = () => {
               ...rowSelection,
             }}
             columns={columns}
-            dataSource={data}
+            dataSource={clients}
             key="clientTable"
+            rowKey={(record) => record.nodeId}
+            scroll={{ y: '60vh' }}
+            style={{ minHeight: '450px' }}
             pagination={{
-              total: data.length,
+              total: clients.length,
               defaultPageSize: pageSize,
+              showSizeChanger: true,
+              pageSizeOptions: [10, 20, 50, 100, clients.length],
               current: page,
+              onShowSizeChange: (current, pageSize) => {
+                console.log(current, pageSize)
+              },
               onChange: (page, pageSize) => {
                 setPage(page), setPageSize(pageSize)
               },

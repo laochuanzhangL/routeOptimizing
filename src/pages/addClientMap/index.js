@@ -8,6 +8,7 @@ import './styles.less'
 import { useParams } from 'react-router-dom'
 import { myDebounce } from '../../utils/myDebounce'
 import httpUtil from '../../utils/httpUtil'
+import md5 from 'js-md5'
 export const AddClientMap = () => {
   const routeParams = useParams()
   const { userId } = routeParams
@@ -18,21 +19,21 @@ export const AddClientMap = () => {
   useEffect(() => {
     getNodes()
   }, [])
+  useEffect(() => {
+    getBeginCenter()
+  }, [nodes])
   const getNodes = () => {
-    const formdata = { userId }
-    httpUtil.getQuestionsNodes(formdata).then((res) => {
+    httpUtil.getAllClients().then((res) => {
       if (res.data.length > 0) {
-        getBeginCenter([...res.data])
         setNodes([...res.data])
       }
     })
   }
 
   //获得最初地图中心点（可以看到该项目所有中心点的最佳位置）
-  const getBeginCenter = (nodes) => {
+  const getBeginCenter = () => {
     if (nodes.length) {
       for (let item of nodes) {
-        const { isCenter } = item
         const { lat, lng } = item
         let point = new BMapGL.Point(lng, lat)
         setCenter(point)
@@ -44,20 +45,27 @@ export const AddClientMap = () => {
   //地图上面点击站点
   const addNode = (e) => {
     const { lng, lat } = e.latlng
+    let sig = md5(
+      `extensions=all&key=e8a9a816ff9e7b6b2a8d365bcb62c3be&location=${lng - 0.00658},${
+        lat - 0.00574
+      }&radius=155345d03864e8a9b3c32586ec78f9a1b`
+    )
     //逆地址编码，不能携带cookie，故单独写请求
     //高德地图逆地址编码得到的地址更加详细，但是经纬度有略微偏差 故做了加减法
     axios
       .get(
-        `https://restapi.amap.com/v3/geocode/regeo?location=${lng - 0.00658},${
+        `https://restapi.amap.com/v3/geocode/regeo?extensions=all&location=${
+          lng - 0.00658
+        },${
           lat - 0.00574
-        }&key=e8a9a816ff9e7b6b2a8d365bcb62c3be&radius=1&extensions=all`
+        }&radius=1&key=e8a9a816ff9e7b6b2a8d365bcb62c3be&sig=${sig}`
       )
       .then((res) => {
+        console.log(res)
         try {
           if (res.data.regeocode.formatted_address.length) {
             const nodeAddress = res.data.regeocode.formatted_address
             const node = {
-              userId,
               nodeAddress,
               lng,
               lat,
@@ -65,6 +73,7 @@ export const AddClientMap = () => {
               nodeName: nodeAddress,
             }
             httpUtil.addClient(node).then((res) => {
+              console.log(res)
               if (res.status == 9999) {
                 getNodes()
               } else {
@@ -74,27 +83,25 @@ export const AddClientMap = () => {
           } else {
             message.warn('请选中国境内地址')
           }
-        } catch(error) {
-          message.error('今日地图选点份额已经使用完毕')
+        } catch (error) {
+          console.log(error)
+          message.error('站点添加错误')
         }
       })
   }
 
   return (
     <div className="selectAddress_wrap">
-      <AddClientHeader
-        setCenter={setCenter}
-        userId={userId}
-        getNodes={getNodes}
-      />
+      <AddClientHeader setCenter={setCenter} getNodes={getNodes} />
       <AddClientTables
         nodes={nodes}
         setNodes={setNodes}
-        userId={userId}
         getNodes={getNodes}
+        setCenter={setCenter}
+        setWindowInfo={setWindowInfo}
       />
       <Map
-        center={center}
+        center={new BMapGL.Point(center.lng, center.lat)}
         zoom="11"
         onClick={addNode}
         enableScrollWheelZoom
@@ -105,7 +112,7 @@ export const AddClientMap = () => {
       >
         {/*   点击后地图上添加Marker */}
         {nodes.map((item) => {
-          const { lat, lng, id, nodeAddress, nodeName, isCenter, nodeId } = item
+          const { lat, lng, nodeAddress, nodeName, isCenter, nodeId } = item
           return (
             <div>
               <Marker
@@ -115,26 +122,24 @@ export const AddClientMap = () => {
                 offset={new BMapGL.Size(0, -8)}
                 onMouseover={(e) => {
                   const handle = () => {
-                    return setWindowInfo([
-                      { lng, lat, nodeAddress, nodeId, nodeName, isCenter },
-                    ])
+                    return setWindowInfo([item])
                   }
                   const addWindowInfo = myDebounce(handle, 300, true)
                   addWindowInfo()
                 }}
-                onMouseout={(e) => {
-                  const handle = () => {
-                    return setWindowInfo([])
-                  }
-                  const clearWindowInfo = myDebounce(handle, 2000, false)
-                  clearWindowInfo()
-                }}
+                // onMouseout={(e) => {
+                //   const handle = () => {
+                //     return setWindowInfo([])
+                //   }
+                //   const clearWindowInfo = myDebounce(handle, 2000, false)
+                //   clearWindowInfo()
+                // }}
               />
             </div>
           )
         })}
         {/* 对Marker添加标签 */}
-        {windowInfo.map((item) => {
+        {windowInfo.map?.((item) => {
           const { lng, lat, nodeAddress, nodeName, isCenter } = item
           return (
             <InfoWindow

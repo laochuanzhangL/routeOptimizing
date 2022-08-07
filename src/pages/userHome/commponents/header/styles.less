@@ -11,18 +11,59 @@
     margin: auto;
     width: 100%;
     max-width: 2000px;
-    height: 60px;
+    min-height: 55px;
+    height: 58px;
     display: flex;
     min-width: 1117px;
     align-items: center;
     background-image: linear-gradient(20deg, #283048, #859398);
     .menu_wrap {
       width: 100%;
+      height: 100%;
+      .ant-menu {
+        border: none;
+        background-color: transparent;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .header_left {
+          display: flex;
+          justify-content: space-evenly;
+          font-size: 22px;
+          align-items: center;
+          min-width: 300px;
+          max-width: 400px;
+          width: 20vw;
+          height: 100%;
+          .ant-menu-item-icon {
+            font-size: 22px;
+            color: white;
+          }
+        }
+        .header_right {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 22px;
+          position: relative;
+          width: 300px;
+          height: 100%;
+          .header_image {
+            width: 35px;
+            min-height: 12px;
+          }
+          .ant-menu-submenu-arrow {
+            display: none;
+          }
+        }
+      }
       .ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected {
         background-color: transparent !important;
         color: #1890ff !important;
         .ant-menu-item-icon {
-          font-size: 22px;
+          font-size:26px;
           color: #1890ff !important;
         }
       }
@@ -37,43 +78,6 @@
       .ant-menu-item-selected a,
       .ant-menu-item-selected a:hover {
         color: #1890ff !important;
-      }
-
-      .ant-menu {
-        border: none;
-        background-color: transparent;
-        width: 100%;
-        height: 60px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        .header_left {
-          display: flex;
-          justify-content: space-evenly;
-          font-size: 22px;
-          align-items: center;
-          width: 300px;
-          height: 100%;
-          .ant-menu-item-icon {
-            font-size: 22px;
-            color: white;
-          }
-        }
-        .header_right {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          font-size: 22px;
-          position: relative;
-          width: 200px;
-          height: 100%;
-          .header_image {
-            width: 35px;
-          }
-          .ant-menu-submenu-arrow {
-            display: none;
-          }
-        }
       }
     }
   }

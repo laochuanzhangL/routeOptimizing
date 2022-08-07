@@ -13,7 +13,7 @@ export const AddClientHeader = (props) => {
   const [uploadVisible, setUploadVisible] = useState(false)
   const [fileList, setFileList] = useState([])
   const [loading, setLoading] = useState(false)
-  const { setCenter, userId, getNodes } = props
+  const { setCenter, getNodes } = props
   const history = useHistory()
   const BMapGL = window.BMapGL
   const { Search } = Input
@@ -66,13 +66,11 @@ export const AddClientHeader = (props) => {
       //检验是否有上传文件
       let formData = new FormData()
       formData.append('file', fileList[0].originFileObj)
-      formData.append('userId', userId)
       setLoading(true)
-      console.log(userId)
       httpUtil.clientsFileUpload(formData).then((res) => {
         setLoading(false)
         if (res.status === 200) {
-          message.success('文件上传成功')
+          message.success('文件上传成功') 
           setUploadVisible(false)
           setFileList([])
           getNodes()
@@ -121,7 +119,7 @@ export const AddClientHeader = (props) => {
         </Button>
       </div>
       <Modal
-        key="nodesUploadModal"
+        key="clientsUploadModal"
         visible={uploadVisible}
         //onOk={}
         onCancel={() => {

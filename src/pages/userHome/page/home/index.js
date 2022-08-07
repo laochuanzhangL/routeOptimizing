@@ -289,10 +289,12 @@ export const Home = () => {
           <Table
             bordered
             size="large"
+            scroll={{y:500}}
+            rowKey={(record) => record.questionId}
             key="itemTable"
             pagination={{
               total: data.length,
-              pageSizeOptions: [6, 10, 20, 30],
+              pageSizeOptions: [6, 10, 20, 30,data.length],
               defaultPageSize: pageSize,
               current: page,
               onChange: (page, pageSize) => {
