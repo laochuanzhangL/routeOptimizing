@@ -30,6 +30,17 @@ export const AddClientMap = () => {
     })
   }
 
+  const handleDeleteClient = (nodeId) => {
+    let parmas = { nodeId }
+    httpUtil.deleteClients(parmas).then((res) => {
+      if (res.status == 9999) {
+        getNodes()
+        message.success('删除成功')
+        setWindowInfo([])
+      } else message.error('删除失败')
+    })
+  }
+
   //获得最初地图中心点（可以看到该项目所有中心点的最佳位置）
   const getBeginCenter = () => {
     if (nodes.length) {
@@ -46,9 +57,9 @@ export const AddClientMap = () => {
   const addNode = (e) => {
     const { lng, lat } = e.latlng
     let sig = md5(
-      `extensions=all&key=e8a9a816ff9e7b6b2a8d365bcb62c3be&location=${lng - 0.00658},${
-        lat - 0.00574
-      }&radius=155345d03864e8a9b3c32586ec78f9a1b`
+      `extensions=all&key=e8a9a816ff9e7b6b2a8d365bcb62c3be&location=${
+        lng - 0.00658
+      },${lat - 0.00574}&radius=155345d03864e8a9b3c32586ec78f9a1b`
     )
     //逆地址编码，不能携带cookie，故单独写请求
     //高德地图逆地址编码得到的地址更加详细，但是经纬度有略微偏差 故做了加减法
@@ -84,7 +95,6 @@ export const AddClientMap = () => {
             message.warn('请选中国境内地址')
           }
         } catch (error) {
-          console.log(error)
           message.error('站点添加错误')
         }
       })
@@ -140,13 +150,29 @@ export const AddClientMap = () => {
         })}
         {/* 对Marker添加标签 */}
         {windowInfo.map?.((item) => {
-          const { lng, lat, nodeAddress, nodeName, isCenter } = item
+          const { lng, lat, nodeAddress, nodeName, isCenter, nodeId } = item
           return (
             <InfoWindow
               position={new BMapGL.Point(lng, lat)}
               title={isCenter == 1 ? '中心点:' : '用户:'}
+              height="auto"
               text={nodeName ? nodeName : nodeAddress}
-            />
+            >
+              <span>{nodeName ? nodeName : nodeAddress}</span>
+              <span
+                style={{
+                  color: '#1890ff',
+                  cursor: 'pointer',
+                  display: 'block',
+                }}
+                onClick={(e) => {
+                  
+                 handleDeleteClient(nodeId)
+                }}
+              >
+                删除
+              </span>
+            </InfoWindow>
           )
         })}
       </Map>

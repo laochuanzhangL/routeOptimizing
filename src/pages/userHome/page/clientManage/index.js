@@ -1,14 +1,17 @@
-import React, { useEffect, useState } from 'react'
+import React, { Suspense, useEffect, useState } from 'react'
 import { useHistory } from 'react-router-dom'
-import { Table, Popconfirm, Input, Pagination, message } from 'antd'
+import { Table, Popconfirm, Input, Pagination, message, Button } from 'antd'
 import './styles.less'
 import httpUtil from '../../../../utils/httpUtil'
 import { ClientTableHeader } from './commponents/clientTableHeader'
+import { data } from 'browserslist'
+import { EditModal } from './commponents/editModal'
 export const ClientManage = () => {
   const userId = sessionStorage.getItem('userId')
   const [clients, setClients] = useState([])
   const [page, setPage] = useState(1)
-  const history = useHistory()
+  const [editingClient, setEditingClient] = useState()
+  const [editVisible, setEditVisible] = useState(false)
   const [pageSize, setPageSize] = useState(50)
 
   //列
@@ -40,26 +43,53 @@ export const ClientManage = () => {
       width: 100,
       dataIndex: 'action',
       render: (_, record) => (
-        <Popconfirm
-          title="确定删除用户吗？"
-          okText="确定"
-          cancelText="取消"
-          key="userPopconfirm"
-          onConfirm={() => handleDelete(record.nodeId)}
-        >
-          <a>删除</a>
-        </Popconfirm>
+        <div className="table_btns">
+          <span
+            style={{
+              color: '#1890ff',
+              cursor: 'pointer',
+              display: 'block',
+            }}
+            onClick={() => {
+              openEditModal(record)
+            }}
+          >
+            编辑
+          </span>
+          <Popconfirm
+            title="确定删除用户吗？"
+            okText="确定"
+            cancelText="取消"
+            key="userPopconfirm"
+            onConfirm={() => handleDelete(record.nodeId)}
+          >
+            <span
+              style={{
+                color: '#1890ff',
+                cursor: 'pointer',
+                display: 'block',
+              }}
+            >
+              删除
+            </span>
+          </Popconfirm>
+        </div>
       ),
     },
   ]
 
   useEffect(() => {
     getClients()
-  },[pageSize])
+  }, [page,pageSize])
 
   //获取所有客户
   const getClients = () => {
-    httpUtil.getAllClients().then((res) => {
+    const params={
+      page,
+      pageSize
+    }
+    httpUtil.getPartClients(params).then((res) => {
+      console.log(res)
       if (res.status == 1000) {
         setClients(res.data)
       }
@@ -76,6 +106,14 @@ export const ClientManage = () => {
       )
     },
   }
+
+  const upload = (e) => {
+    console.log(e)
+  }
+  const handleCancel = () => {
+    setEditVisible(false)
+    setEditingClient()
+  }
   //处理删除函数
   const handleDelete = (nodeId) => {
     let parmas = { nodeId }
@@ -87,6 +125,11 @@ export const ClientManage = () => {
     })
   }
 
+  //打开编辑框
+  const openEditModal = (record) => {
+    setEditingClient(record)
+    setEditVisible(true)
+  }
   return (
     <div className="clientManage">
       <div className="content">
@@ -108,12 +151,11 @@ export const ClientManage = () => {
             key="clientTable"
             rowKey={(record) => record.nodeId}
             scroll={{ y: '60vh' }}
-            style={{ minHeight: '450px' }}
             pagination={{
               total: clients.length,
               defaultPageSize: pageSize,
               showSizeChanger: true,
-              pageSizeOptions: [10, 20, 50, 100, clients.length],
+              pageSizeOptions: [2, 20, 50, 100, clients.length],
               current: page,
               onShowSizeChange: (current, pageSize) => {
                 console.log(current, pageSize)
@@ -122,6 +164,24 @@ export const ClientManage = () => {
                 setPage(page), setPageSize(pageSize)
               },
             }}
+          />
+          <div className="table_footer_btn">
+            <Button type="Link" key="deleteall">
+              清空所有
+            </Button>
+            <Button
+              type="Link"
+              key="clientdeleteselect"
+              style={{ marginLeft: '10px' }}
+            >
+              删除已选
+            </Button>
+          </div>
+          <EditModal
+            editVisible={editVisible}
+            editingClient={editingClient}
+            setEditVisible={setEditVisible}
+            setEditingClient={setEditingClient}
           />
         </div>
       </div>

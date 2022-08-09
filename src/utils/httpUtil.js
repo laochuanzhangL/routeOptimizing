@@ -104,7 +104,11 @@ class HttpUtil {
   //删除单个用户
   deleteClients = (params) =>
     httpReq('delete', `/node/deleteClientNode?nodeId=${params.nodeId}`)
-  //添加单个用户
+  //修改用户信息
+  editClients=(params)=>
+    httpReq('patch','/node/updateNode',params)
+  //分页获取客户
+  getPartClients=(params)=>httpReq('get',`/node/getPartClientNodes?currentPage=${params.page}&counts=${params.pageSize}`)
 }
 
 export default new HttpUtil()

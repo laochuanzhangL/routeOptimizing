@@ -39,7 +39,7 @@ export const Home = () => {
     {
       title: '创建时间',
       dataIndex: 'createTime',
-      width: 200,
+      width: 250,
       render: (e) => {
         return dayjs(e).format('YYYY-MM-DD')
       },
@@ -47,7 +47,6 @@ export const Home = () => {
     {
       title: '项目名',
       dataIndex: 'questionName',
-      width: 150,
       render: (e) => {
         return e
       },
@@ -56,7 +55,6 @@ export const Home = () => {
     {
       title: '数据配备',
       key: 'prepare',
-      width: 200,
       render: (e) => {
         const { questionId, processState } = e
         return (
@@ -72,7 +70,6 @@ export const Home = () => {
     {
       title: '查看结果',
       key: 'result',
-      width: 200,
       render: (e) => {
         const { questionId } = e
 
@@ -116,7 +113,6 @@ export const Home = () => {
     {
       title: '结果创建时间',
       dataIndex: 'createTime',
-      width: 200,
       render: (_, record) => {
         const { createTime } = record
         const time = dayjs(createTime).format('YYYY-MM-DD HH:mm')
@@ -126,7 +122,6 @@ export const Home = () => {
     {
       title: '使用算法',
       dataIndex: 'algorithm',
-      width: 200,
       render: (e) => {
         return e
       },
