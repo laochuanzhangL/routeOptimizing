@@ -36,13 +36,9 @@ export const httpReq = (method, url, data, resType) => {
         switch (status) {
           case 400:
             message.error(`用户未登录: ${errInfo}`)
-            window.location.href = '/'
             break
           case 401:
             message.error(`认证失败: ${errInfo}`)
-            break
-          case 403:
-            message.error(`未授权:请重新登录`)
             setTimeout(() => {
               window.location.href = '/'
             }, 1000)

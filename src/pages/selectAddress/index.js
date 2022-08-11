@@ -6,7 +6,6 @@ import { message } from 'antd'
 import { SelectHeader, SelectNodes, SelectSide } from './commponents/index'
 import './styles.less'
 import { useParams } from 'react-router-dom'
-import { myDebounce } from '../../utils/myDebounce'
 import httpUtil from '../../utils/httpUtil'
 export const SelectAddress = () => {
   const routeParams = useParams()
@@ -22,6 +21,7 @@ export const SelectAddress = () => {
   const getNodes = () => {
     const formdata = { questionId }
     httpUtil.getQuestionsNodes(formdata).then((res) => {
+      console.log(res)
       if (res.data.length > 0) {
         getBeginCenter([...res.data])
         setNodes([...res.data])
@@ -80,7 +80,7 @@ export const SelectAddress = () => {
       >
         {/*   点击后地图上添加Marker */}
         {nodes.map((item) => {
-          const { lat, lng, nodeAddress, nodeName, isCenter, nodeId } = item
+          const { lat, lng, isCenter, nodeId } = item
           return (
             <div>
               <Marker
@@ -89,21 +89,8 @@ export const SelectAddress = () => {
                 key={nodeId}
                 offset={new BMapGL.Size(0, -8)}
                 onMouseover={(e) => {
-                  const handle = () => {
-                    return setWindowInfo([
-                      { lng, lat, nodeAddress, nodeId, nodeName, isCenter },
-                    ])
-                  }
-                  const addWindowInfo = myDebounce(handle, 300, true)
-                  addWindowInfo()
+                  setWindowInfo([item])
                 }}
-                // onMouseout={(e) => {
-                //   const handle = () => {
-                //     return setWindowInfo([])
-                //   }
-                //   const clearWindowInfo = myDebounce(handle, 2000, false)
-                //   clearWindowInfo()
-                // }}
               />
             </div>
           )

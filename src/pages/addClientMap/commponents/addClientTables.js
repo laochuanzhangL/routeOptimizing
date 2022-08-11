@@ -3,13 +3,14 @@ import { useState, useEffect } from 'react'
 import { Table, Input, Button, Popconfirm, message, Space, Modal } from 'antd'
 import httpUtil from '../../../utils/httpUtil'
 export const AddClientTables = (props) => {
-  const [centerVisible, setCenterVisible] = useState(false)
   const [detailsVisible, setDetailsVisible] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState([])
   const [detailSelectedRowKeys, setDetailSelectedRowKeys] = useState([])
-  const [searchNodes, setSearchNodes] = useState([])
-  const [page, setPage] = useState(1)
-  const { nodes, setNodes, getNodes ,setCenter,setWindowInfo} = props
+  const [searchClients, setSearchClients] = useState([])
+  const [pageNum, setPageNum] = useState(1)
+  const [pageSize, setPageSize] = useState(8)
+  const [clients, setClients] = useState([])
+  const {getNodes ,setWindowInfo,nodes} = props
   const { Search } = Input
   const nodeColumns = [
     {
@@ -78,41 +79,26 @@ export const AddClientTables = (props) => {
   ]
   useEffect(() => {
     getClients()
-  }, [])
+  }, [pageNum,pageSize])
 
   //获取所有客户
   const getClients = () => {
-    httpUtil.getAllClients().then((res) => {
-      if (res.status == 1000) {
-        setNodes(res.data)
+    const params={
+      pageNum,
+      pageSize
+    }
+    httpUtil.getPartClients(params).then((res) => {
+      if (res.status == 9999) {
+        console.log(res)
+        setClients(res.data.records)
       }
     })
   }
   useEffect(() => {
     getselectedRowKeys()
-  }, [nodes])
+  }, [clients])
 
-  // //改变地图展示中心点
-  // const changeCenter = (e) => {
-  //   const { lat, lng } = e
-  //   console.log(e)
-  
-  // }
 
-  const detailSearch = (e) => {
-    const keyWord = e.target.value
-    const arr = []
-    nodes.map((item) => {
-      for (const [key, value] of Object.entries(item)) {
-        const str = value + ''
-        if (str.indexOf(keyWord) >= 0) {
-          arr.push(item)
-          break
-        }
-      }
-    })
-    setSearchNodes([...arr])
-  }
   const openDetails = () => {
     setDetailsVisible(true)
   }
@@ -121,10 +107,11 @@ export const AddClientTables = (props) => {
     const query = { nodeId }
     httpUtil.deleteNode(query).then((res) => {
       if (res.status == 9999) {
-        message.success('删除选点成功')
-        const index = nodes.indexOf(e)
-        nodes.splice(index, 1)
-        setNodes([...nodes])
+        // message.success('删除选点成功')
+        // const index = clients.indexOf(e)
+        // nodes.splice(index, 1)
+        // setClients([...nodes])
+        getClients()
         getNodes() //会发出请求 反应更慢 用下面的方式，页面反应更快
       } else {
         message.error('删除选点失败')
@@ -134,7 +121,7 @@ export const AddClientTables = (props) => {
 
   const cancelDetail = () => {
     setDetailsVisible(false)
-    setSearchNodes([])
+    setSearchClients([])
   }
   // 查看详细页面的删除
   const deleteSelect = (e) => {
@@ -143,10 +130,10 @@ export const AddClientTables = (props) => {
     } else {
       if (confirm('是否要删除所选站点')) {
         console.log(e)
-        const filtered = nodes.filter(function (value, index, arr) {
+        const filtered = clients.filter(function (value, index, arr) {
           return !detailSelectedRowKeys.includes(value.nodeId)
         })
-        setNodes(filtered)
+        setClients(filtered)
         setDetailSelectedRowKeys([])
       }
     }
@@ -170,7 +157,7 @@ export const AddClientTables = (props) => {
       result.then((res) => {
         if (res.status == 9999) {
           getNodes()
-          setNodes([])
+          getClients()
           message.success(res.msg)
         } else {
           message.warn(res.msg)
@@ -185,31 +172,31 @@ export const AddClientTables = (props) => {
   const detailSelectChange = (selectedRowKeys, selectedRows) => {
     setDetailSelectedRowKeys(selectedRowKeys)
   }
-  const upload = () => {
-    if (selectedRowKeys.length == 0) {
-      message.warn('请选择至少一个中心点')
-    } else {
-      for (let node of nodes) {
-        if (selectedRowKeys.includes(node.nodeId)) {
-          node.isCenter = 1
-        }
-      }
-      httpUtil.updateNode(nodes).then((res) => {
-        if (res.status == 9999) {
-          setCenterVisible(false)
-          message.success('中心点选择成功')
-          getNodes()
-          setSelectedRowKeys([])
-        } else {
-          message.error('请提交正确数据')
-        }
-      })
-    }
-  }
+  // const upload = () => {
+  //   if (selectedRowKeys.length == 0) {
+  //     message.warn('请选择至少一个中心点')
+  //   } else {
+  //     for (let node of nodes) {
+  //       if (selectedRowKeys.includes(node.nodeId)) {
+  //         node.isCenter = 1
+  //       }
+  //     }
+  //     httpUtil.updateNode(nodes).then((res) => {
+  //       if (res.status == 9999) {
+  //         setCenterVisible(false)
+  //         message.success('中心点选择成功')
+  //         getNodes()
+  //         setSelectedRowKeys([])
+  //       } else {
+  //         message.error('请提交正确数据')
+  //       }
+  //     })
+  //   }
+  // }
 
   const getselectedRowKeys = () => {
     const arr = []
-    nodes.map((item) => {
+    clients.map((item) => {
       const { isCenter } = item
       if (isCenter) {
         const { nodeId } = item
@@ -245,7 +232,7 @@ export const AddClientTables = (props) => {
     <div className="nodes">
       <Table
         bordered
-        key="nodesTable"
+        key="clientsAddTable"
         dataSource={nodes}
         columns={nodeColumns}
         rowKey={(record) => {
@@ -290,15 +277,15 @@ export const AddClientTables = (props) => {
           <Search
             key="clientDetailsSearch"
             placeholder="请输入目标编号/名称/地址/经纬度"
-            onChange={detailSearch}
+            // onChange={detailSearch}
             enterButton
           />
         </div>
         <Table
           bordered
           scroll={{ y: '50vh' }}
-          key="clientDetailsTable"
-          dataSource={searchNodes.length ? searchNodes : nodes}
+          key="clientsAddDetailsTable"
+          dataSource={searchClients.length ? searchClients : clients}
           rowSelection={detailRowSelection}
           columns={detailsColumns}
           rowKey={(record) => {
@@ -306,12 +293,17 @@ export const AddClientTables = (props) => {
           }}
           height="50vh"
           pagination={{
-            total: nodes.length,
-            defaultPageSize: 8,
-            current: page,
-            onChange: (page) => {
-              setPage(page)
-            },
+            total: clients.length,
+              defaultPageSize: pageSize,
+              showSizeChanger: true,
+              pageSizeOptions: [2, 20, 50, 100, clients.length],
+              current: pageNum,
+              onShowSizeChange: (current, pageSize) => {
+                console.log(current, pageSize)
+              },
+              onChange: (page, pageSize) => {
+                setPageNum(page), setPageSize(pageSize)
+              },
           }}
         />
       </Modal>

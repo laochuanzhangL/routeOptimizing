@@ -54,9 +54,6 @@ export const downloadFile = (method, url, data, resType) => {
             break
           case 401:
             message.error(`认证失败: ${errInfo}`)
-            break
-          case 403:
-            message.error(`未授权:请重新登录`)
             setTimeout(() => {
               window.location.href = '/'
             }, 1000)

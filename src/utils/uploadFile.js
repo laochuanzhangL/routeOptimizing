@@ -37,7 +37,7 @@ export const uploadFile = (method, url, data, resType) => {
         const status = err.response.status
         const errInfo = err.response.data.message || status
         // 将错误信息传递下去
-        reject({ status, errInfo }) 
+        reject({ status, errInfo })
         // 根据状态码做提示处理
         switch (status) {
           case 400:
@@ -46,9 +46,6 @@ export const uploadFile = (method, url, data, resType) => {
             break
           case 401:
             message.error(`认证失败: ${errInfo}`)
-            break
-          case 403:
-            message.error(`未授权:请重新登录`)
             setTimeout(() => {
               window.location.href = '/'
             }, 1000)

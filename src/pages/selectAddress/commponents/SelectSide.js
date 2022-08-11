@@ -189,6 +189,7 @@ export const SelectSide = (props) => {
     })
   }
   const openCars = () => {
+    setCarsVisible(true)
     if (haveCenter) {
       setCarsVisible(true)
     } else {
@@ -307,6 +308,7 @@ export const SelectSide = (props) => {
         visible={addCarsVisible}
         onCancel={cancelAddCars}
         footer={null}
+        key="addCarsModal"
       >
         <Form
           labelCol={{
@@ -317,6 +319,7 @@ export const SelectSide = (props) => {
           }}
           onFinish={addCars}
           layout="horizontal"
+          key="addCarsForm"
           size="center"
         >
           <Form.Item

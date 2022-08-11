@@ -1,19 +1,47 @@
 import React from 'react'
-import { Input, Button, Upload, message, Modal, Table } from 'antd'
-import {
-  CloudUploadOutlined,
-  ImportOutlined,
-  UserAddOutlined,
-} from '@ant-design/icons'
+import { Input, Button, message, Modal, Table } from 'antd'
+import { useEffect } from 'react'
+import { ImportOutlined, UserAddOutlined } from '@ant-design/icons'
 import { useHistory } from 'react-router'
 import { useState } from 'react'
 import httpUtil from '../../../utils/httpUtil'
 export const SelectHeader = (props) => {
+  const [clients, setClients] = useState([])
+  const [pageNum, setPageNum] = useState(1)
+  const [pageSize, setPageSize] = useState(8)
+  const [selectedRowKeys, setSelectedRowKeys] = useState([])
+  const [clientsSelectedRowKeys, setClientsSelectedRowKeys] = useState([])
   const [clientAddVisible, setClientAddVisible] = useState(true)
-  const { setCenter, questionId, getNodes } = props
+  const [clientLen, setClientLen] = useState(0)
+  const { setCenter, questionId} = props
   const history = useHistory()
   const BMapGL = window.BMapGL
   const { Search } = Input
+
+  const clientsColumns = [
+    {
+      title: '编号',
+      dataIndex: 'nodeId',
+      width: 120,
+      render: (render) => {
+        return render
+      },
+    },
+    {
+      title: '用户名称',
+      dataIndex: 'nodeName',
+      render: (render) => {
+        return render
+      },
+    },
+    {
+      title: '详细地址',
+      dataIndex: 'nodeAddress',
+      render: (render) => {
+        return render
+      },
+    },
+  ]
   //改变地图中心位置
   const onSearch = (e) => {
     //不能携带cookie，故单独写请求
@@ -36,10 +64,54 @@ export const SelectHeader = (props) => {
   const goBack = () => {
     history.push('/user')
   }
+  useEffect(() => {
+    getClients()
+  }, [pageNum,pageSize])
 
+  //获取所有客户
+  const getClients = () => {
+    const params={
+      pageNum,
+      pageSize
+    }
+    httpUtil.getPartClients(params).then((res) => {
+      if (res.status == 9999) {
+        setClients(res.data.records)
+        setClientLen(res.data.total)
+      }
+    })
+  }
   const changeShowClients = () => {}
 
-  const submitClients = () => {}
+  const submitClients = () => {
+    console.log(clientsSelectedRowKeys)
+    const parmas={
+      questionId,
+      nodeIdList:clientsSelectedRowKeys
+    }
+    console.log(parmas)
+    httpUtil.batchUploadNodes(parmas).then(res=>{
+      if(res.status==9999){
+        message.success(res.msg)
+      }
+    })
+  }
+
+  const selectChange = (selectedRowKeys, selectedRows) => {
+    setSelectedRowKeys(selectedRowKeys)
+  }
+
+  const clientsSelectChange = (selectedRowKeys, selectedRows) => {
+    setClientsSelectedRowKeys(selectedRowKeys)
+    console.log(selectedRowKeys)
+
+  }
+
+
+  const clientsRowSelection = {
+    clientsSelectedRowKeys,
+    onChange: clientsSelectChange,
+  }
   return (
     <div className="selectAddress_header">
       <div className="search_wrap">
@@ -112,7 +184,39 @@ export const SelectHeader = (props) => {
         }}
         height="600px"
       >
-        <Table></Table>
+        <div className="clients_map_search">
+          <Search
+            key="clientsMapSearch"
+            placeholder="请输入目标编号/名称/地址/经纬度"
+            // onChange={clientsSearch}
+            enterButton
+          />
+        </div>
+        <Table
+          bordered
+          key="clientsTable"
+          dataSource={clients}
+          rowSelection={clientsRowSelection}
+          columns={clientsColumns}
+          rowKey={(record) => {
+            return record.nodeId
+          }}
+          scroll={{y:'50vh'}}
+          height="600px"
+          pagination={{
+            total: clientLen,
+              defaultPageSize: pageSize,
+              showSizeChanger: true,
+              pageSizeOptions: [2, 20, 50, 100, clients.length],
+              current: pageNum,
+              onShowSizeChange: (current, pageSize) => {
+                console.log(current, pageSize)
+              },
+              onChange: (page, pageSize) => {
+                setPageNum(page), setPageSize(pageSize)
+              },
+          }}
+        />
       </Modal>
     </div>
   )

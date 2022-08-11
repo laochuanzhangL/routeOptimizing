@@ -3,16 +3,19 @@ import { useHistory } from 'react-router-dom'
 import { Table, Popconfirm, Input, Pagination, message, Button } from 'antd'
 import './styles.less'
 import httpUtil from '../../../../utils/httpUtil'
+import { QuestionCircleOutlined } from '@ant-design/icons';
 import { ClientTableHeader } from './commponents/clientTableHeader'
 import { data } from 'browserslist'
 import { EditModal } from './commponents/editModal'
 export const ClientManage = () => {
   const userId = sessionStorage.getItem('userId')
+  const [searchClients, setSearchClients] = useState([])
   const [clients, setClients] = useState([])
-  const [page, setPage] = useState(1)
+  const [pageNum, setPageNum] = useState(1)
   const [editingClient, setEditingClient] = useState()
+  const [clientLen, setClientLen] = useState(0)
   const [editVisible, setEditVisible] = useState(false)
-  const [pageSize, setPageSize] = useState(50)
+  const [pageSize, setPageSize] = useState(10)
 
   //列
   const columns = [
@@ -80,18 +83,18 @@ export const ClientManage = () => {
 
   useEffect(() => {
     getClients()
-  }, [page,pageSize])
+  }, [pageNum, pageSize])
 
   //获取所有客户
   const getClients = () => {
-    const params={
-      page,
-      pageSize
+    const params = {
+      pageNum,
+      pageSize,
     }
     httpUtil.getPartClients(params).then((res) => {
-      console.log(res)
-      if (res.status == 1000) {
-        setClients(res.data)
+      if (res.status == 9999) {
+        setClients(res.data.records)
+        setClientLen(res.data.total)
       }
     })
   }
@@ -105,10 +108,6 @@ export const ClientManage = () => {
         selectedRows
       )
     },
-  }
-
-  const upload = (e) => {
-    console.log(e)
   }
   const handleCancel = () => {
     setEditVisible(false)
@@ -130,6 +129,34 @@ export const ClientManage = () => {
     setEditingClient(record)
     setEditVisible(true)
   }
+  //修改用户信息的请求
+  const uploadEdit = (e) => {
+    const newClient = {
+      lat: parseFloat(e.lat),
+      lng: parseFloat(e.lng),
+      nodeAddress: e.nodeaddress,
+      nodeId: e.nodeid,
+      nodeName: e.nodename,
+    }
+    httpUtil.editClients([newClient]).then((res) => {
+      if (res.status === 9999) {
+        message.success('修改成功')
+        getClients()
+        setEditVisible(false)
+      } else {
+        message.error('修改失败')
+      }
+    })
+  }
+  //清空所有
+  const deleteAllClients = () => {
+    httpUtil.deleteAllClients().then((res) => {
+      if (res.status == 9999) {
+        message.success('删除成功')
+        getClients()
+      }
+    })
+  }
   return (
     <div className="clientManage">
       <div className="content">
@@ -137,7 +164,12 @@ export const ClientManage = () => {
           userId={userId}
           getClients={getClients}
           clients={clients}
+          pageSize={pageSize}
+          pageNum={pageNum}
           setClients={setClients}
+          searchClients={searchClients}
+          setSearchClients={setSearchClients}
+          setClientLen={setClientLen}
         />
         <div className="table_wrap">
           <Table
@@ -152,36 +184,47 @@ export const ClientManage = () => {
             rowKey={(record) => record.nodeId}
             scroll={{ y: '60vh' }}
             pagination={{
-              total: clients.length,
+              total: clientLen,
               defaultPageSize: pageSize,
               showSizeChanger: true,
-              pageSizeOptions: [2, 20, 50, 100, clients.length],
-              current: page,
+              pageSizeOptions: [10, 20, 50, 100, clientLen],
+              current: pageNum,
               onShowSizeChange: (current, pageSize) => {
                 console.log(current, pageSize)
               },
               onChange: (page, pageSize) => {
-                setPage(page), setPageSize(pageSize)
+                setPageNum(page), setPageSize(pageSize)
               },
             }}
           />
-          <div className="table_footer_btn">
-            <Button type="Link" key="deleteall">
-              清空所有
-            </Button>
-            <Button
-              type="Link"
-              key="clientdeleteselect"
-              style={{ marginLeft: '10px' }}
-            >
-              删除已选
-            </Button>
-          </div>
+          {clients.length ? (
+            <div className="table_footer_btn">
+              <Popconfirm
+                title="确定要清空用户吗？"
+                icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+                onConfirm={deleteAllClients}
+                okText="确认"
+                cancelText="取消"
+              >
+                <Button type="Link" key="deleteallClients">
+                  清空所有
+                </Button>
+              </Popconfirm>
+              <Button
+                type="Link"
+                key="clientdeleteselect"
+                style={{ marginLeft: '10px' }}
+              >
+                删除已选
+              </Button>
+            </div>
+          ) : null}
           <EditModal
             editVisible={editVisible}
             editingClient={editingClient}
             setEditVisible={setEditVisible}
             setEditingClient={setEditingClient}
+            uploadEdit={uploadEdit}
           />
         </div>
       </div>

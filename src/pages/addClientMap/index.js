@@ -6,7 +6,6 @@ import { AddClientTables, AddClientHeader } from './commponents/index'
 import { message } from 'antd'
 import './styles.less'
 import { useParams } from 'react-router-dom'
-import { myDebounce } from '../../utils/myDebounce'
 import httpUtil from '../../utils/httpUtil'
 import md5 from 'js-md5'
 export const AddClientMap = () => {
@@ -24,7 +23,7 @@ export const AddClientMap = () => {
   }, [nodes])
   const getNodes = () => {
     httpUtil.getAllClients().then((res) => {
-      if (res.data.length > 0) {
+      if (res.status==9999) {
         setNodes([...res.data])
       }
     })
@@ -131,19 +130,8 @@ export const AddClientMap = () => {
                 key={nodeId}
                 offset={new BMapGL.Size(0, -8)}
                 onMouseover={(e) => {
-                  const handle = () => {
-                    return setWindowInfo([item])
-                  }
-                  const addWindowInfo = myDebounce(handle, 300, true)
-                  addWindowInfo()
+                   setWindowInfo([item])
                 }}
-                // onMouseout={(e) => {
-                //   const handle = () => {
-                //     return setWindowInfo([])
-                //   }
-                //   const clearWindowInfo = myDebounce(handle, 2000, false)
-                //   clearWindowInfo()
-                // }}
               />
             </div>
           )

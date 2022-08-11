@@ -144,7 +144,6 @@ export const SelectNodes = (props) => {
       message.warn('请至少选择一个点')
     } else {
       if (confirm('是否要删除所选站点')) {
-        console.log(e)
         const filtered = nodes.filter(function (value, index, arr) {
           return !detailSelectedRowKeys.includes(value.nodeId)
         })
@@ -158,7 +157,6 @@ export const SelectNodes = (props) => {
     const params = { questionId }
     if (confirm('是否要清空所有站点')) {
       const result = httpUtil.deleteAllNodes(params)
-      console.log(result)
       result.then((res) => {
         if (res.status == 9999) {
           getNodes()
@@ -198,7 +196,6 @@ export const SelectNodes = (props) => {
       })
     }
   }
-
   const getselectedRowKeys = () => {
     const arr = []
     nodes.map((item) => {
@@ -336,14 +333,7 @@ export const SelectNodes = (props) => {
             return record.nodeId
           }}
           height="600px"
-          pagination={{
-            total: nodes.length,
-            defaultPageSize: 8,
-            current: page,
-            onChange: (page) => {
-              setPage(page)
-            },
-          }}
+          pagination={false}
         />
       </Modal>
     </div>

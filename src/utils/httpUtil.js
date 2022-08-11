@@ -41,6 +41,8 @@ class HttpUtil {
     httpReq('get', `/node/getQuestionNodes?questionId=${params.questionId}`)
   //修改点信息
   updateNode = (params) => httpReq('patch', '/node/updateNode', params)
+  //批量选点
+  batchUploadNodes=(params)=>httpReq('post',`/node/batch/${params.questionId}`,params.nodeIdList)
 
   //下载文件模板
   downloadNodesFile = () => downloadFile('get', '/node/download', {}, 'blob')
@@ -96,7 +98,7 @@ class HttpUtil {
   clientsFileUpload = (params) =>
     uploadFile(
       'post',
-      `/node/excelClientNodeInfo/${params.get('userId')}`,
+      `/node/excelClientNodeInfo`,
       params
     )
   //获取所有客户
@@ -105,10 +107,21 @@ class HttpUtil {
   deleteClients = (params) =>
     httpReq('delete', `/node/deleteClientNode?nodeId=${params.nodeId}`)
   //修改用户信息
-  editClients=(params)=>
-    httpReq('patch','/node/updateNode',params)
+  editClients = (params) => httpReq('PATCH', '/node/updateClientNode', params)
   //分页获取客户
-  getPartClients=(params)=>httpReq('get',`/node/getPartClientNodes?currentPage=${params.page}&counts=${params.pageSize}`)
+  getPartClients = (params) =>
+    httpReq(
+      'get',
+      `/node/getPartClientNodes?pageNum=${params.pageNum}&pageSize=${params.pageSize}`
+    )
+  //搜索客户
+  searchClients = (params) =>
+    httpReq(
+      'post',
+      `/node/fuzzyMatchingClientNode?partInfo=${params.keyValue}&pageNum=${params.pageNum}&pageSize=${params.pageSize}`
+    )
+  //清空所有客户
+  deleteAllClients = () => httpReq('delete', '/node/deleteClientNodesByUserId')
 }
 
-export default new HttpUtil()
+export default new HttpUtil() 

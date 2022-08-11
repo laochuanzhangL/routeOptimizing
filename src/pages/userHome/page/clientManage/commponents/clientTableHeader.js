@@ -3,9 +3,16 @@ import { useHistory } from 'react-router-dom'
 import { Button, message, Modal, Input, Upload, Spin } from 'antd'
 import { exportFile } from '../../../../../utils/exportFile'
 import httpUtil from '../../../../../utils/httpUtil'
+import throttle from 'lodash/throttle'
 import { InboxOutlined } from '@ant-design/icons'
 export const ClientTableHeader = (props) => {
-  const { clients, setClients, getClients, userId } = props
+  const {
+    getClients,
+    pageSize,
+    pageNum,
+    setClients,
+    setClientLen,
+  } = props
   const { Search } = Input
   const [uploadVisible, setUploadVisible] = useState(false)
   const [fileList, setFileList] = useState([])
@@ -62,13 +69,20 @@ export const ClientTableHeader = (props) => {
     }
   }
 
-  //处理删除函数
-  const handleDelete = (e) => {}
-
   //查找用户
-  const userSearch = (e) => {
+  const clientSearch = (e) => {
     console.log(e)
+    let keyValue = e.target.value
+    let params = { keyValue, pageNum, pageSize }
+    httpUtil.searchClients(params).then((res) => {
+      if (res.status == 9999) {
+        setClientLen(res.data.total)
+        setClients(res.data.records)
+      }
+    })
   }
+  const throttleSearh = throttle((e) => clientSearch(e), 500)
+
   return (
     <div className="table_header_content">
       <div className="btn_wrap">
@@ -93,11 +107,11 @@ export const ClientTableHeader = (props) => {
           文件导入
         </Button>
       </div>
-      <div className="user_search">
+      <div className="client_search">
         <Search
-          key="centerSearch"
+          key="clientSearch"
           placeholder="请输入客户编号/名称/详细地址/经纬度"
-          onChange={userSearch}
+          onChange={throttleSearh}
           style={{ height: '100%' }}
           enterButton
         />
