@@ -2,28 +2,37 @@ import axios from 'axios'
 import React from 'react'
 import { useState, useEffect } from 'react'
 import { Map, Marker, NavigationControl, InfoWindow } from 'react-bmapgl'
-import { AddClientTables, AddClientHeader } from './commponents/index'
-import { message } from 'antd'
+import {
+  AddClientTables,
+  AddClientHeader,
+  AddClientModal,
+} from './commponents/index'
+import { message, Modal } from 'antd'
 import './styles.less'
 import { useParams } from 'react-router-dom'
 import httpUtil from '../../utils/httpUtil'
 import md5 from 'js-md5'
 export const AddClientMap = () => {
-  const routeParams = useParams()
-  const { userId } = routeParams
   const [center, setCenter] = useState({ lng: 116.402544, lat: 39.928216 })
+  const [addingClient, setAddingClient] = useState()
+  const [clientAddVisible, setClientAddVisible] = useState(false)
   const [nodes, setNodes] = useState([])
   const [windowInfo, setWindowInfo] = useState([])
   const BMapGL = window.BMapGL
   useEffect(() => {
     getNodes()
   }, [])
+
+  useEffect(() => {
+    openAddClientModal()
+  }, [addingClient])
+
   useEffect(() => {
     getBeginCenter()
   }, [nodes])
   const getNodes = () => {
     httpUtil.getAllClients().then((res) => {
-      if (res.status==9999) {
+      if (res.status == 9999) {
         setNodes([...res.data])
       }
     })
@@ -31,13 +40,20 @@ export const AddClientMap = () => {
 
   const handleDeleteClient = (nodeId) => {
     let parmas = { nodeId }
-    httpUtil.deleteClients(parmas).then((res) => {
+    httpUtil.deleteClient(parmas).then((res) => {
       if (res.status == 9999) {
         getNodes()
         message.success('删除成功')
         setWindowInfo([])
       } else message.error('删除失败')
     })
+  }
+
+  const openAddClientModal = () => {
+    if (addingClient) {
+      console.log(123)
+      setClientAddVisible(true)
+    }
   }
 
   //获得最初地图中心点（可以看到该项目所有中心点的最佳位置）
@@ -53,7 +69,7 @@ export const AddClientMap = () => {
   }
 
   //地图上面点击站点
-  const addNode = (e) => {
+  const getClientMsg = (e) => {
     const { lng, lat } = e.latlng
     let sig = md5(
       `extensions=all&key=e8a9a816ff9e7b6b2a8d365bcb62c3be&location=${
@@ -71,7 +87,6 @@ export const AddClientMap = () => {
         }&radius=1&key=e8a9a816ff9e7b6b2a8d365bcb62c3be&sig=${sig}`
       )
       .then((res) => {
-        console.log(res)
         try {
           if (res.data.regeocode.formatted_address.length) {
             const nodeAddress = res.data.regeocode.formatted_address
@@ -79,17 +94,10 @@ export const AddClientMap = () => {
               nodeAddress,
               lng,
               lat,
-              questionName: ' ',
               nodeName: nodeAddress,
             }
-            httpUtil.addClient(node).then((res) => {
-              console.log(res)
-              if (res.status == 9999) {
-                getNodes()
-              } else {
-                message.warn(res.msg)
-              }
-            })
+            setAddingClient(node)
+            setClientAddVisible(true)
           } else {
             message.warn('请选中国境内地址')
           }
@@ -102,6 +110,12 @@ export const AddClientMap = () => {
   return (
     <div className="selectAddress_wrap">
       <AddClientHeader setCenter={setCenter} getNodes={getNodes} />
+      <AddClientModal
+        addingClient={addingClient}
+        setClientAddVisible={setClientAddVisible}
+        getNodes={getNodes}
+        clientAddVisible={clientAddVisible}
+      />
       <AddClientTables
         nodes={nodes}
         setNodes={setNodes}
@@ -112,7 +126,9 @@ export const AddClientMap = () => {
       <Map
         center={new BMapGL.Point(center.lng, center.lat)}
         zoom="11"
-        onClick={addNode}
+        onClick={(e) => {
+          getClientMsg(e)
+        }}
         enableScrollWheelZoom
         style={{
           position: 'relative',
@@ -130,7 +146,7 @@ export const AddClientMap = () => {
                 key={nodeId}
                 offset={new BMapGL.Size(0, -8)}
                 onMouseover={(e) => {
-                   setWindowInfo([item])
+                  setWindowInfo([item])
                 }}
               />
             </div>
@@ -154,8 +170,7 @@ export const AddClientMap = () => {
                   display: 'block',
                 }}
                 onClick={(e) => {
-                  
-                 handleDeleteClient(nodeId)
+                  handleDeleteClient(nodeId)
                 }}
               >
                 删除

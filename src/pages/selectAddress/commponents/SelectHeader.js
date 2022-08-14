@@ -9,11 +9,10 @@ export const SelectHeader = (props) => {
   const [clients, setClients] = useState([])
   const [pageNum, setPageNum] = useState(1)
   const [pageSize, setPageSize] = useState(8)
-  const [selectedRowKeys, setSelectedRowKeys] = useState([])
   const [clientsSelectedRowKeys, setClientsSelectedRowKeys] = useState([])
-  const [clientAddVisible, setClientAddVisible] = useState(true)
+  const [clientAddVisible, setClientAddVisible] = useState(false)
   const [clientLen, setClientLen] = useState(0)
-  const { setCenter, questionId} = props
+  const { setCenter, questionId, getNodes, nodes,getNodesId } = props
   const history = useHistory()
   const BMapGL = window.BMapGL
   const { Search } = Input
@@ -42,6 +41,13 @@ export const SelectHeader = (props) => {
       },
     },
   ]
+
+  useEffect(() => {
+    setClientsSelectedRowKeys(getNodesId())
+  }, [nodes])
+
+
+
   //改变地图中心位置
   const onSearch = (e) => {
     //不能携带cookie，故单独写请求
@@ -66,13 +72,13 @@ export const SelectHeader = (props) => {
   }
   useEffect(() => {
     getClients()
-  }, [pageNum,pageSize])
+  }, [pageNum, pageSize])
 
   //获取所有客户
   const getClients = () => {
-    const params={
+    const params = {
       pageNum,
-      pageSize
+      pageSize,
     }
     httpUtil.getPartClients(params).then((res) => {
       if (res.status == 9999) {
@@ -84,32 +90,27 @@ export const SelectHeader = (props) => {
   const changeShowClients = () => {}
 
   const submitClients = () => {
-    console.log(clientsSelectedRowKeys)
-    const parmas={
+    const parmas = {
       questionId,
-      nodeIdList:clientsSelectedRowKeys
+      nodeIdList: clientsSelectedRowKeys,
     }
-    console.log(parmas)
-    httpUtil.batchUploadNodes(parmas).then(res=>{
-      if(res.status==9999){
+
+    httpUtil.batchUploadNodes(parmas).then((res) => {
+      if (res.status == 9999) {
         message.success(res.msg)
+        getNodes()
+        setClientAddVisible(false)
       }
     })
   }
 
-  const selectChange = (selectedRowKeys, selectedRows) => {
-    setSelectedRowKeys(selectedRowKeys)
-  }
-
   const clientsSelectChange = (selectedRowKeys, selectedRows) => {
     setClientsSelectedRowKeys(selectedRowKeys)
-    console.log(selectedRowKeys)
-
   }
-
 
   const clientsRowSelection = {
     clientsSelectedRowKeys,
+    defaultSelectedRowKeys: getNodesId(),
     onChange: clientsSelectChange,
   }
   return (
@@ -147,10 +148,8 @@ export const SelectHeader = (props) => {
       <Modal
         key="clientAddModal"
         visible={clientAddVisible}
+        destroyOnClose={true}
         title="添加客户"
-        // okText="确认"
-        // cancelText="取消"
-        // onOk={submitClients}
         onCancel={() => {
           setClientAddVisible(false)
         }}
@@ -201,20 +200,20 @@ export const SelectHeader = (props) => {
           rowKey={(record) => {
             return record.nodeId
           }}
-          scroll={{y:'50vh'}}
+          scroll={{ y: '50vh' }}
           height="600px"
           pagination={{
             total: clientLen,
-              defaultPageSize: pageSize,
-              showSizeChanger: true,
-              pageSizeOptions: [2, 20, 50, 100, clients.length],
-              current: pageNum,
-              onShowSizeChange: (current, pageSize) => {
-                console.log(current, pageSize)
-              },
-              onChange: (page, pageSize) => {
-                setPageNum(page), setPageSize(pageSize)
-              },
+            defaultPageSize: pageSize,
+            showSizeChanger: true,
+            pageSizeOptions: [2, 20, 50, 100, clients.length],
+            current: pageNum,
+            onShowSizeChange: (current, pageSize) => {
+              console.log(current, pageSize)
+            },
+            onChange: (page, pageSize) => {
+              setPageNum(page), setPageSize(pageSize)
+            },
           }}
         />
       </Modal>

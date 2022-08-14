@@ -4,25 +4,22 @@ import { Table, Input, Button, Popconfirm, message, Space, Modal } from 'antd'
 import httpUtil from '../../../utils/httpUtil'
 export const SelectNodes = (props) => {
   const [centerVisible, setCenterVisible] = useState(false)
-  const [detailsVisible, setDetailsVisible] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState([])
-  const [detailSelectedRowKeys, setDetailSelectedRowKeys] = useState([])
   const [searchNodes, setSearchNodes] = useState([])
-  const [page, setPage] = useState(1)
-  const { nodes, setNodes, questionId, getNodes } = props
+  const { nodes, questionId, getNodes, setWindowInfo, getNodesId } = props
   const { Search } = Input
   const nodeColumns = [
     {
       title: '编号',
-      dataIndex: 'nodeId',
+      dataIndex: 'clientId',
       width: 100,
       render: (render) => {
         return render
       },
     },
     {
-      title: '详细地址',
-      dataIndex: 'nodeAddress',
+      title: '客户名称',
+      dataIndex: 'nodeName',
       render: (render) => {
         return render
       },
@@ -32,25 +29,22 @@ export const SelectNodes = (props) => {
       dataIndex: 'action',
       width: 70,
       render: (_, record) => (
-        <Space size="middle">
-          <Popconfirm
-            title="是否删除?"
-            okText="确定"
-            cancelText="取消"
-            onConfirm={() => handleDelete(record)}
-          >
-            <a>删除</a>
-          </Popconfirm>
-        </Space>
+        <span
+          style={{ color: '#1890ff', cursor: 'pointer', display: 'block' }}
+          onClick={() => {
+            setWindowInfo([record])
+          }}
+        >
+          跳转
+        </span>
       ),
     },
   ]
-  //详细页面Columns
   const detailsColumns = [
     {
       title: '编号',
       dataIndex: 'nodeId',
-      width: 120,
+      width: 100,
       render: (render) => {
         return render
       },
@@ -69,11 +63,15 @@ export const SelectNodes = (props) => {
         return render
       },
     },
+    {
+      title: '中心点',
+      dataIndex: 'isCenter',
+      width: 80,
+      render: (render) => {
+        return render ? '是' : '否'
+      },
+    },
   ]
-
-  useEffect(() => {
-    getselectedRowKeys()
-  }, [nodes])
 
   const centerSearch = (e) => {
     const keyWord = e.target.value
@@ -89,38 +87,23 @@ export const SelectNodes = (props) => {
     })
     setSearchNodes([...arr])
   }
-  const detailSearch = (e) => {
-    const keyWord = e.target.value
-    const arr = []
-    nodes.map((item) => {
-      for (const [key, value] of Object.entries(item)) {
-        const str = value + ''
-        if (str.indexOf(keyWord) >= 0) {
-          arr.push(item)
-          break
-        }
-      }
-    })
-    setSearchNodes([...arr])
-  }
-  const openDetails = () => {
-    setDetailsVisible(true)
-  }
-  const handleDelete = (e) => {
-    const { nodeId } = e
-    const query = { nodeId, questionId }
-    httpUtil.deleteNode(query).then((res) => {
-      if (res.status == 9999) {
-        message.success('删除选点成功')
-        const index = nodes.indexOf(e)
-        nodes.splice(index, 1)
-        setNodes([...nodes])
-        getNodes() //会发出请求 反应更慢 用下面的方式，页面反应更快
-      } else {
-        message.error('删除选点失败')
-      }
-    })
-  }
+  // const detailSearch = (e) => {
+  //   const keyWord = e.target.value
+  //   const arr = []
+  //   nodes.map((item) => {
+  //     for (const [key, value] of Object.entries(item)) {
+  //       const str = value + ''
+  //       if (str.indexOf(keyWord) >= 0) {
+  //         arr.push(item)
+  //         break
+  //       }
+  //     }
+  //   })
+  //   setSearchNodes([...arr])
+  // }
+  // const openDetails = () => {
+  //   setDetailsVisible(true)
+  // }
 
   //选择中心点
   const selectCenter = () => {
@@ -133,37 +116,38 @@ export const SelectNodes = (props) => {
     setSearchNodes([])
   }
 
-  const cancelDetail = () => {
-    setDetailsVisible(false)
-
-    setSearchNodes([])
-  }
-  //查看详细页面的删除
+  // const cancelDetail = () => {
+  //   setDetailsVisible(false)
+  //   setSearchNodes([])
+  // }
+  //删除已选站点
   const deleteSelect = (e) => {
-    if (detailSelectedRowKeys.length == 0) {
+    if (selectedRowKeys.length == 0) {
       message.warn('请至少选择一个点')
     } else {
       if (confirm('是否要删除所选站点')) {
-        const filtered = nodes.filter(function (value, index, arr) {
-          return !detailSelectedRowKeys.includes(value.nodeId)
+        let parmas = { nodeIdList: selectedRowKeys, questionId }
+        httpUtil.deleteNodes(parmas).then((res) => {
+          if (res.status == 9999) {
+            message.success(res.msg)
+            getNodes()
+            setSelectedRowKeys([])
+          }
         })
-        setNodes(filtered)
-        setDetailSelectedRowKeys([])
       }
     }
   }
   //清空所有点
   const deleteAll = () => {
-    const params = { questionId }
     if (confirm('是否要清空所有站点')) {
-      const result = httpUtil.deleteAllNodes(params)
-      result.then((res) => {
+      const params = { questionId, nodeIdList: getNodesId() }
+      httpUtil.deleteNodes(params).then((res) => {
+        console.log(res)
         if (res.status == 9999) {
           getNodes()
-          setNodes([])
-          message.success(res.msg)
+          message.success("清空成功")
         } else {
-          message.warn(res.msg)
+          message.warn("删除失败")
         }
       })
     }
@@ -172,19 +156,16 @@ export const SelectNodes = (props) => {
     setSelectedRowKeys(selectedRowKeys)
   }
 
-  const detailSelectChange = (selectedRowKeys, selectedRows) => {
-    setDetailSelectedRowKeys(selectedRowKeys)
-  }
   const upload = () => {
     if (selectedRowKeys.length == 0) {
       message.warn('请选择至少一个中心点')
     } else {
-      for (let node of nodes) {
-        if (selectedRowKeys.includes(node.nodeId)) {
-          node.isCenter = 1
-        }
+      let params = {
+        questionId,
+        nodeIdList: selectedRowKeys,
       }
-      httpUtil.updateNode(nodes).then((res) => {
+      httpUtil.setCenterNodes(params).then((res) => {
+        console.log(res)
         if (res.status == 9999) {
           setCenterVisible(false)
           message.success('中心点选择成功')
@@ -196,42 +177,19 @@ export const SelectNodes = (props) => {
       })
     }
   }
-  const getselectedRowKeys = () => {
-    const arr = []
-    nodes.map((item) => {
-      const { isCenter } = item
-      if (isCenter) {
-        const { nodeId } = item
-        arr.push(nodeId)
-      }
-    })
-    setSelectedRowKeys(arr)
-  }
 
   //中心点table的rowSelection
   const rowSelection = {
     selectedRowKeys,
     onChange: selectChange,
   }
-  //查看详细table的rowSelection
-  const detailRowSelection = {
-    detailSelectedRowKeys,
-    onChange: detailSelectChange,
-  }
+
   //左下角table的底部元素
   const nodeFooter = () => {
     return (
-      <div className="node_footer">
-        <div className="button_wrap">
-          <div></div>
-          <Button type="primary" onClick={selectCenter}>
-            选择中心点
-          </Button>
-        </div>
-        <div className="details">
-          <a onClick={openDetails}>查看详细</a>
-        </div>
-      </div>
+      <Button type="primary" onClick={selectCenter}>
+        选择中心点
+      </Button>
     )
   }
   return (
@@ -255,9 +213,9 @@ export const SelectNodes = (props) => {
         key="centerModal"
         visible={centerVisible}
         onOk={upload}
-        width="1000px"
+        width="1100px"
         style={{
-          minWidth: '800px',
+          minWidth: '1100px',
           minHeight: '600px',
         }}
         height="600px"
@@ -265,6 +223,22 @@ export const SelectNodes = (props) => {
         okText="确认"
         className="center_modal"
         cancelText="取消"
+        footer={[
+          <Button type="Link" key="deleteall" onClick={deleteAll}>
+            清空所有
+          </Button>,
+          <Button
+            type="primary"
+            key="delete"
+            onClick={deleteSelect}
+            style={{ marginRight: '770px' }}
+          >
+            删除已选
+          </Button>,
+          <Button type="primary" key="ok" onClick={upload}>
+            选为中心点
+          </Button>,
+        ]}
       >
         <div className="center_search">
           <Search
@@ -286,7 +260,7 @@ export const SelectNodes = (props) => {
       </Modal>
 
       {/* 查看详细的Modal */}
-      <Modal
+      {/* <Modal
         visible={detailsVisible}
         onCancel={cancelDetail}
         title="站点详细"
@@ -335,7 +309,7 @@ export const SelectNodes = (props) => {
           height="600px"
           pagination={false}
         />
-      </Modal>
+      </Modal> */}
     </div>
   )
 }

@@ -1,35 +1,51 @@
 import React from 'react'
 import { Button, Modal, Form, Input, message } from 'antd'
-export const EditModal = (props) => {
-  const {
-    editVisible,
-    editingClient,
-    setEditVisible,
-    setEditingClient,
-    uploadEdit,
-  } = props
-  const handleCancel = () => {
-    setEditVisible(false)
-    setEditingClient()
+import httpUtil from '../../../utils/httpUtil'
+export const AddClientModal = (props) => {
+  const { addingClient, setClientAddVisible, getNodes, clientAddVisible } =
+    props
+  const addClient = (e) => {
+    const client = {
+      lat: parseFloat(e.lat),
+      lng: parseFloat(e.lng),
+      nodeAddress: e.nodeaddress,
+      nodeName: e.nodename,
+      clientId: parseInt(e.clientid),
+    }
+    httpUtil.addClient(client).then((res) => {
+        if (res.status == 9999) {
+          getNodes()
+          message.success(res.msg)
+          setClientAddVisible(false)
+        } else {
+          message.error("当前客户编号已存在")
+        }
+      })
   }
+
   return (
     <Modal
-      title="修改客户信息"
-      footer={null}
-      visible={editVisible}
+      key="clientaddmodal"
+      visible={clientAddVisible}
       destroyOnClose={true}
-      key="editclientvisible"
-      onCancel={handleCancel}
+      onCancel={() => {
+        setClientAddVisible(false)
+      }}
+      footer={false}
+      cancelText="取消"
+      okText="确定"
+      title="添加站点"
+      className="client_add_modal"
     >
       <Form
-        key="editclientform"
+        key="addclientform"
         labelCol={{
           span: 4,
         }}
         wrapperCol={{
           span: 14,
         }}
-        onFinish={uploadEdit}
+        onFinish={addClient}
         layout="horizontal"
         size="center"
       >
@@ -37,15 +53,15 @@ export const EditModal = (props) => {
           label="客户编号"
           key="clientId"
           name="clientid"
-          initialValue={editingClient?.clientId ?? 0}
+          rules={[{ required: true, message: '请输入客户编号' }]}
         >
-         <Input bordered="false" placeholder="请输入客户编号" />
+          <Input bordered="false" placeholder="请输入客户编号" />
         </Form.Item>
         <Form.Item
           label="客户名称"
           name="nodename"
           key="nodeName"
-          initialValue={editingClient?.nodeName ?? 0}
+          initialValue={addingClient?.nodeName ?? 0}
           rules={[{ required: true, message: '请输入客户名称' }]}
         >
           <Input bordered="false" placeholder="请输入客户名称" />
@@ -54,7 +70,7 @@ export const EditModal = (props) => {
           label="详细地址"
           name="nodeaddress"
           key="nodeAddress"
-          initialValue={editingClient?.nodeAddress ?? 0}
+          initialValue={addingClient?.nodeAddress ?? 0}
           rules={[{ required: true, message: '请输入详细地址' }]}
         >
           <Input bordered="false" placeholder="请输入详细地址" />
@@ -63,23 +79,21 @@ export const EditModal = (props) => {
           label="地点经度"
           name="lng"
           key="clientlng"
-          initialValue={editingClient?.lng ?? 0}
+          initialValue={addingClient?.lng ?? 0}
           required
-          rules={[{ required: true, message: '请输入数字' }]}
         >
-          <Input bordered="false" type="number" placeholder="请输入经度" />
+          {addingClient?.lng ?? 0}
         </Form.Item>
         <Form.Item
           label="地点纬度"
           name="lat"
           key="clientlat"
-          initialValue={editingClient?.lat ?? 0}
-          rules={[{ required: true, message: '请输入数字' }]}
+          initialValue={addingClient?.lat ?? 0}
         >
-          <Input bordered="false" type="number" placeholder="请输入纬度" />
+          {addingClient?.lat ?? 0}
         </Form.Item>
         <Form.Item
-          key="submitEditClient"
+          key="submitAddClient"
           style={{
             display: 'flex',
             justifyContent: 'center',

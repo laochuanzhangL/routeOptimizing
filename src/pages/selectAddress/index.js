@@ -21,10 +21,9 @@ export const SelectAddress = () => {
   const getNodes = () => {
     const formdata = { questionId }
     httpUtil.getQuestionsNodes(formdata).then((res) => {
-      console.log(res)
-      if (res.data.length > 0) {
-        getBeginCenter([...res.data])
-        setNodes([...res.data])
+      if (res.status === 9999) {
+        getBeginCenter(res.data)
+        setNodes(res.data)
         for (let node of res.data) {
           if (node.isCenter) {
             setHaveCenter(true)
@@ -34,6 +33,27 @@ export const SelectAddress = () => {
         }
       } else {
         setHaveCenter(false)
+      }
+    })
+  }
+
+  //获取当前问题中所有点的nodeId
+  const getNodesId = () => {
+    return nodes.map((item) => {
+      return item.nodeId
+    })
+  }
+
+  //删除地图上的点
+  const handleDeleteOne = (e) => {
+    const parmas = { nodeIdList: [e], questionId }
+    httpUtil.deleteNodes(parmas).then((res) => {
+      if (res.status == 9999) {
+        message.success('删除选点成功')
+        getNodes()
+        setWindowInfo([])
+      } else {
+        message.warn('删除选点失败')
       }
     })
   }
@@ -59,10 +79,14 @@ export const SelectAddress = () => {
         setCenter={setCenter}
         questionId={questionId}
         getNodes={getNodes}
+        nodes={nodes}
+        getNodesId={getNodesId}
       />
       <SelectNodes
         nodes={nodes}
         setNodes={setNodes}
+        getNodesId={getNodesId}
+        setWindowInfo={setWindowInfo}
         setHaveCente={setHaveCenter}
         questionId={questionId}
         getNodes={getNodes}
@@ -97,13 +121,28 @@ export const SelectAddress = () => {
         })}
         {/* 对Marker添加标签 */}
         {windowInfo.map((item) => {
-          const { lng, lat, nodeAddress, nodeName, isCenter } = item
+          const { lng, lat, nodeAddress, nodeName, isCenter, nodeId } = item
           return (
             <InfoWindow
               position={new BMapGL.Point(lng, lat)}
               title={isCenter == 1 ? '中心点:' : '用户:'}
+              height="auto"
               text={nodeName ? nodeName : nodeAddress}
-            />
+            >
+              <span>{nodeName ? nodeName : nodeAddress}</span>
+              <span
+                style={{
+                  color: '#1890ff',
+                  cursor: 'pointer',
+                  display: 'block',
+                }}
+                onClick={(e) => {
+                  handleDeleteOne(nodeId)
+                }}
+              >
+                删除
+              </span>
+            </InfoWindow>
           )
         })}
       </Map>

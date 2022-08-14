@@ -189,7 +189,6 @@ export const SelectSide = (props) => {
     })
   }
   const openCars = () => {
-    setCarsVisible(true)
     if (haveCenter) {
       setCarsVisible(true)
     } else {

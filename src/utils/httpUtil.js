@@ -35,14 +35,17 @@ class HttpUtil {
   deleteAllNodes = (params) =>
     httpReq('delete', `/node/clearNodes?questionId=${params.questionId}`)
   //删除指定点
-  deleteNode = (params) => httpReq('delete', '/node/deleteNode', params)
+  deleteNodes = (params) => httpReq('delete', `/node/batch/${params.questionId}`, params.nodeIdList)
   //获取项目选点信息
   getQuestionsNodes = (params) =>
-    httpReq('get', `/node/getQuestionNodes?questionId=${params.questionId}`)
+    httpReq('get', `/node/getQuestionNodes?questionId=${params.questionId}`,params)
+  //批量设置中心点
+  setCenterNodes=(params)=>httpReq('put',`/node/batch/center/${params.questionId}`,params.nodeIdList)
   //修改点信息
   updateNode = (params) => httpReq('patch', '/node/updateNode', params)
   //批量选点
-  batchUploadNodes=(params)=>httpReq('post',`/node/batch/${params.questionId}`,params.nodeIdList)
+  batchUploadNodes = (params) =>
+    httpReq('post', `/node/batch/${params.questionId}`, params.nodeIdList)
 
   //下载文件模板
   downloadNodesFile = () => downloadFile('get', '/node/download', {}, 'blob')
@@ -96,15 +99,11 @@ class HttpUtil {
   addClient = (params) => httpReq('post', '/node/newClientNode', params)
   //文件导入客户
   clientsFileUpload = (params) =>
-    uploadFile(
-      'post',
-      `/node/excelClientNodeInfo`,
-      params
-    )
+    uploadFile('post', `/node/excelClientNodeInfo`, params)
   //获取所有客户
   getAllClients = () => httpReq('get', `/node/getClientNodes`)
   //删除单个用户
-  deleteClients = (params) =>
+  deleteClient = (params) =>
     httpReq('delete', `/node/deleteClientNode?nodeId=${params.nodeId}`)
   //修改用户信息
   editClients = (params) => httpReq('PATCH', '/node/updateClientNode', params)
@@ -112,7 +111,7 @@ class HttpUtil {
   getPartClients = (params) =>
     httpReq(
       'get',
-      `/node/getPartClientNodes?pageNum=${params.pageNum}&pageSize=${params.pageSize}`
+      `/node/pageClientNodes?pageNum=${params.pageNum}&pageSize=${params.pageSize}`
     )
   //搜索客户
   searchClients = (params) =>
@@ -122,6 +121,10 @@ class HttpUtil {
     )
   //清空所有客户
   deleteAllClients = () => httpReq('delete', '/node/deleteClientNodesByUserId')
+
+  //批量删除客户
+  deleteClients = (parmas) =>
+    httpReq('delete', '/node/batch', parmas.nodeIdList)
 }
 
-export default new HttpUtil() 
+export default new HttpUtil()

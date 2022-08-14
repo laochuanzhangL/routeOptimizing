@@ -10,7 +10,8 @@ export const AddClientTables = (props) => {
   const [pageNum, setPageNum] = useState(1)
   const [pageSize, setPageSize] = useState(8)
   const [clients, setClients] = useState([])
-  const {getNodes ,setWindowInfo,nodes} = props
+  const [clientsLen, setClientsLen] = useState(0)
+  const { getNodes, setWindowInfo, nodes } = props
   const { Search } = Input
   const nodeColumns = [
     {
@@ -41,14 +42,6 @@ export const AddClientTables = (props) => {
         >
           跳转
         </span>
-        // {/* <Popconfirm
-        //   title="是否删除?"
-        //   okText="确定"
-        //   cancelText="取消"
-        //   onConfirm={() => handleDeleteClient(record.nodeId)}
-        // >
-        //   <a>删除</a>
-        // </Popconfirm> */}
       ),
     },
   ]
@@ -79,18 +72,18 @@ export const AddClientTables = (props) => {
   ]
   useEffect(() => {
     getClients()
-  }, [pageNum,pageSize])
+  }, [pageNum, pageSize,nodes])
 
   //获取所有客户
   const getClients = () => {
-    const params={
+    const params = {
       pageNum,
-      pageSize
+      pageSize,
     }
     httpUtil.getPartClients(params).then((res) => {
       if (res.status == 9999) {
-        console.log(res)
         setClients(res.data.records)
+        setClientsLen(res.data.total)
       }
     })
   }
@@ -98,25 +91,8 @@ export const AddClientTables = (props) => {
     getselectedRowKeys()
   }, [clients])
 
-
   const openDetails = () => {
     setDetailsVisible(true)
-  }
-  const handleDelete = (e) => {
-    const { nodeId } = e
-    const query = { nodeId }
-    httpUtil.deleteNode(query).then((res) => {
-      if (res.status == 9999) {
-        // message.success('删除选点成功')
-        // const index = clients.indexOf(e)
-        // nodes.splice(index, 1)
-        // setClients([...nodes])
-        getClients()
-        getNodes() //会发出请求 反应更慢 用下面的方式，页面反应更快
-      } else {
-        message.error('删除选点失败')
-      }
-    })
   }
 
   const cancelDetail = () => {
@@ -124,17 +100,20 @@ export const AddClientTables = (props) => {
     setSearchClients([])
   }
   // 查看详细页面的删除
-  const deleteSelect = (e) => {
+  const deleteSelect = () => {
     if (detailSelectedRowKeys.length == 0) {
       message.warn('请至少选择一个点')
     } else {
       if (confirm('是否要删除所选站点')) {
-        console.log(e)
-        const filtered = clients.filter(function (value, index, arr) {
-          return !detailSelectedRowKeys.includes(value.nodeId)
+        let parmas = { nodeIdList: detailSelectedRowKeys }
+        httpUtil.deleteClients(parmas).then((res) => {
+          if (res.status == 9999) {
+            message.success(res.msg)
+            getClients()
+            getNodes()
+            setDetailSelectedRowKeys([])
+          }
         })
-        setClients(filtered)
-        setDetailSelectedRowKeys([])
       }
     }
   }
@@ -144,55 +123,27 @@ export const AddClientTables = (props) => {
     httpUtil.deleteClients(parmas).then((res) => {
       if (res.status == 9999) {
         getClients()
+        getNodes()
         message.success('删除成功')
       } else message.error('删除失败')
     })
   }
   //清空所有点
   const deleteAll = () => {
-    const params = { userId: 1 }
     if (confirm('是否要清空所有站点')) {
-      const result = httpUtil.deleteAllNodes(params)
-      console.log(result)
-      result.then((res) => {
+      httpUtil.deleteAllClients().then((res) => {
         if (res.status == 9999) {
-          getNodes()
+          message.success('删除成功')
           getClients()
-          message.success(res.msg)
-        } else {
-          message.warn(res.msg)
+          getNodes()
         }
       })
     }
-  }
-  const selectChange = (selectedRowKeys, selectedRows) => {
-    setSelectedRowKeys(selectedRowKeys)
   }
 
   const detailSelectChange = (selectedRowKeys, selectedRows) => {
     setDetailSelectedRowKeys(selectedRowKeys)
   }
-  // const upload = () => {
-  //   if (selectedRowKeys.length == 0) {
-  //     message.warn('请选择至少一个中心点')
-  //   } else {
-  //     for (let node of nodes) {
-  //       if (selectedRowKeys.includes(node.nodeId)) {
-  //         node.isCenter = 1
-  //       }
-  //     }
-  //     httpUtil.updateNode(nodes).then((res) => {
-  //       if (res.status == 9999) {
-  //         setCenterVisible(false)
-  //         message.success('中心点选择成功')
-  //         getNodes()
-  //         setSelectedRowKeys([])
-  //       } else {
-  //         message.error('请提交正确数据')
-  //       }
-  //     })
-  //   }
-  // }
 
   const getselectedRowKeys = () => {
     const arr = []
@@ -206,11 +157,6 @@ export const AddClientTables = (props) => {
     setSelectedRowKeys(arr)
   }
 
-  //中心点table的rowSelection
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: selectChange,
-  }
   //查看详细table的rowSelection
   const detailRowSelection = {
     detailSelectedRowKeys,
@@ -293,17 +239,14 @@ export const AddClientTables = (props) => {
           }}
           height="50vh"
           pagination={{
-            total: clients.length,
-              defaultPageSize: pageSize,
-              showSizeChanger: true,
-              pageSizeOptions: [2, 20, 50, 100, clients.length],
-              current: pageNum,
-              onShowSizeChange: (current, pageSize) => {
-                console.log(current, pageSize)
-              },
-              onChange: (page, pageSize) => {
-                setPageNum(page), setPageSize(pageSize)
-              },
+            total: clientsLen,
+            defaultPageSize: pageSize,
+            showSizeChanger: true,
+            pageSizeOptions: [2, 20, 50, 100, clientsLen],
+            current: pageNum,
+            onChange: (page, pageSize) => {
+              setPageNum(page), setPageSize(pageSize)
+            },
           }}
         />
       </Modal>

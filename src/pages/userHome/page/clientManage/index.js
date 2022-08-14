@@ -1,11 +1,9 @@
-import React, { Suspense, useEffect, useState } from 'react'
-import { useHistory } from 'react-router-dom'
-import { Table, Popconfirm, Input, Pagination, message, Button } from 'antd'
+import React, { useEffect, useState } from 'react'
+import { Table, Popconfirm, message, Button } from 'antd'
 import './styles.less'
 import httpUtil from '../../../../utils/httpUtil'
-import { QuestionCircleOutlined } from '@ant-design/icons';
+import { QuestionCircleOutlined } from '@ant-design/icons'
 import { ClientTableHeader } from './commponents/clientTableHeader'
-import { data } from 'browserslist'
 import { EditModal } from './commponents/editModal'
 export const ClientManage = () => {
   const userId = sessionStorage.getItem('userId')
@@ -16,12 +14,13 @@ export const ClientManage = () => {
   const [clientLen, setClientLen] = useState(0)
   const [editVisible, setEditVisible] = useState(false)
   const [pageSize, setPageSize] = useState(10)
+  const [selectClients, setSeleceClients] = useState([])
 
   //列
   const columns = [
     {
-      title: '编号',
-      dataIndex: 'nodeId',
+      title: '客户编号',
+      dataIndex: 'clientId',
       width: 100,
     },
     {
@@ -64,7 +63,7 @@ export const ClientManage = () => {
             okText="确定"
             cancelText="取消"
             key="userPopconfirm"
-            onConfirm={() => handleDelete(record.nodeId)}
+            onConfirm={() => deleteOneClient(record.nodeId)}
           >
             <span
               style={{
@@ -102,28 +101,35 @@ export const ClientManage = () => {
   //单选框变化函数
   const rowSelection = {
     onChange: (selectedRowKeys, selectedRows) => {
-      console.log(
-        `selectedRowKeys: ${selectedRowKeys}`,
-        'selectedRows: ',
-        selectedRows
-      )
+      setSeleceClients(selectedRowKeys)
     },
   }
-  const handleCancel = () => {
-    setEditVisible(false)
-    setEditingClient()
-  }
-  //处理删除函数
-  const handleDelete = (nodeId) => {
+  //删除单个客户
+  const deleteOneClient = (nodeId) => {
     let parmas = { nodeId }
-    httpUtil.deleteClients(parmas).then((res) => {
+    httpUtil.deleteClient(parmas).then((res) => {
       if (res.status == 9999) {
         getClients()
+        setSeleceClients([])
         message.success('删除成功')
       } else message.error('删除失败')
     })
   }
 
+  //批量删除
+  const deleteClients = () => {
+    if (searchClients) {
+      let parmas={nodeIdList :selectClients}
+      httpUtil.deleteClients(parmas).then((res) => {
+        if (res.status == 9999) {
+          message.success(res.msg)
+          getClients()
+        }
+      })
+    } else {
+      message.warn('请选择客户')
+    }
+  }
   //打开编辑框
   const openEditModal = (record) => {
     setEditingClient(record)
@@ -135,8 +141,9 @@ export const ClientManage = () => {
       lat: parseFloat(e.lat),
       lng: parseFloat(e.lng),
       nodeAddress: e.nodeaddress,
-      nodeId: e.nodeid,
+      nodeId: editingClient.nodeId,
       nodeName: e.nodename,
+      clientId: parseInt(e.clientid),
     }
     httpUtil.editClients([newClient]).then((res) => {
       if (res.status === 9999) {
@@ -210,13 +217,34 @@ export const ClientManage = () => {
                   清空所有
                 </Button>
               </Popconfirm>
-              <Button
-                type="Link"
-                key="clientdeleteselect"
-                style={{ marginLeft: '10px' }}
-              >
-                删除已选
-              </Button>
+              {selectClients?.length ?? false ? (
+                <Popconfirm
+                  title="确定要删除已选用户吗？"
+                  icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+                  onConfirm={deleteClients}
+                  okText="确认"
+                  cancelText="取消"
+                >
+                  <Button
+                    key="clientdeleteselect"
+                    type="primary"
+                    style={{ marginLeft: '10px' }}
+                  >
+                    {`已选${selectClients.length}个`}
+                  </Button>
+                </Popconfirm>
+              ) : (
+                <Button
+                  type="Link"
+                  key="clientdeleteselect"
+                  style={{ marginLeft: '10px' }}
+                  onClick={()=>{
+                    message.warn('请先选择要删除的客户')
+                  }}
+                >
+                  删除已选
+                </Button>
+              )}
             </div>
           ) : null}
           <EditModal
