@@ -73,6 +73,21 @@ export const SelectAddress = () => {
     }
   }
 
+  //地图点击设置中心点
+  const setCenterNode=(nodeId)=>{
+    let params = {
+      questionId,
+      nodeIdList: [nodeId],
+    }
+    httpUtil.setCenterNodes(params).then((res) => {
+      if (res.status == 9999) {
+        message.success('中心点设置成功')
+        getNodes()
+      } else {
+        message.error('请提交正确数据')
+      }
+    })
+  }
   return (
     <div className="selectAddress_wrap">
       <SelectHeader
@@ -130,18 +145,36 @@ export const SelectAddress = () => {
               text={nodeName ? nodeName : nodeAddress}
             >
               <span>{nodeName ? nodeName : nodeAddress}</span>
-              <span
-                style={{
-                  color: '#1890ff',
-                  cursor: 'pointer',
-                  display: 'block',
-                }}
-                onClick={(e) => {
-                  handleDeleteOne(nodeId)
-                }}
-              >
-                删除
-              </span>
+              <div style={{
+                display:'flex',
+                flexWrap:'nowrap'
+              }}>
+                <div
+                  style={{
+                    color: '#1890ff',
+                    cursor: 'pointer',
+                    display: 'block',
+                  }}
+                  onClick={(e) => {
+                    handleDeleteOne(nodeId)
+                  }}
+                >
+                  删除
+                </div>
+                <div
+                  style={{
+                    color: '#1890ff',
+                    cursor: 'pointer',
+                    display: 'block',
+                    marginLeft:'20px',
+                  }}
+                  onClick={(e) => {
+                    setCenterNode(nodeId)
+                  }}
+                >
+                  设为中心点
+                </div>
+              </div>
             </InfoWindow>
           )
         })}

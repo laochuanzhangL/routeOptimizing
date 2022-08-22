@@ -35,12 +35,18 @@ class HttpUtil {
   deleteAllNodes = (params) =>
     httpReq('delete', `/node/clearNodes?questionId=${params.questionId}`)
   //删除指定点
-  deleteNodes = (params) => httpReq('delete', `/node/batch/${params.questionId}`, params.nodeIdList)
+  deleteNodes = (params) =>
+    httpReq('delete', `/node/batch/${params.questionId}`, params.nodeIdList)
   //获取项目选点信息
   getQuestionsNodes = (params) =>
-    httpReq('get', `/node/getQuestionNodes?questionId=${params.questionId}`,params)
+    httpReq(
+      'get',
+      `/node/getQuestionNodes?questionId=${params.questionId}`,
+      params
+    )
   //批量设置中心点
-  setCenterNodes=(params)=>httpReq('put',`/node/batch/center/${params.questionId}`,params.nodeIdList)
+  setCenterNodes = (params) =>
+    httpReq('put', `/node/batch/center/${params.questionId}`, params.nodeIdList)
   //修改点信息
   updateNode = (params) => httpReq('patch', '/node/updateNode', params)
   //批量选点
@@ -48,7 +54,8 @@ class HttpUtil {
     httpReq('post', `/node/batch/${params.questionId}`, params.nodeIdList)
 
   //下载文件模板
-  downloadNodesFile = () => downloadFile('get', '/node/download', {}, 'blob')
+  downloadNodesFile = () =>
+    downloadFile('get', '/file/node/download', {}, 'blob')
   /**算法模块 */
   //获取所有算法
   getAllAlgorithmNames = () => httpReq('get', '/algorithm/list?type=0')
@@ -94,6 +101,14 @@ class HttpUtil {
       {},
       'blob'
     )
+  //文本导入结果
+  uploadResultFile = (params) =>
+    uploadFile('post', `/scheme/import/${params.get('questionId')}`, params)
+
+  //导入结果模板文件
+  downloadResultsTemplate = () =>
+    downloadFile('get', `/file/result/download`, {}, 'blob')
+
   /**客户模块 */
   //点击地图添加选点
   addClient = (params) => httpReq('post', '/node/newClientNode', params)

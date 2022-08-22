@@ -43,6 +43,7 @@ const babelRuntimeEntryHelpers = require.resolve(
 const babelRuntimeRegenerator = require.resolve('@babel/runtime/regenerator', {
   paths: [babelRuntimeEntry],
 })
+const NodePolyfillPlugin = require('node-polyfill-webpack-plugin')
 
 // Some apps do not need the benefits of saving a web request, so not inlining the chunk
 // makes for a smoother build process.
@@ -71,8 +72,8 @@ const cssRegex = /\.css$/
 const cssModuleRegex = /\.module\.css$/
 const sassRegex = /\.(scss|sass)$/
 const sassModuleRegex = /\.module\.(scss|sass)$/
-const lessRegex=/\.less$/
-const lessModuleRegex=/\.module\.less$/
+const lessRegex = /\.less$/
+const lessModuleRegex = /\.module\.less$/
 
 const hasJsxRuntime = (() => {
   if (process.env.DISABLE_NEW_JSX_TRANSFORM === 'true') {
@@ -301,6 +302,26 @@ module.exports = function (webpackEnv) {
       modules: ['node_modules', paths.appNodeModules].concat(
         modules.additionalModulePaths || []
       ),
+      fallback: {
+        http: require.resolve('stream-http'),
+        https: require.resolve('https-browserify'),
+        url: require.resolve('url'),
+        process: require.resolve('process/browser'),
+        zlib: require.resolve('browserify-zlib'),
+        stream: require.resolve('stream-browserify'),
+        util: require.resolve('util'),
+        buffer: require.resolve('buffer'),
+        asset: require.resolve('assert'),
+        child_process:false,
+        fs: false,
+        inspector:false,
+        worker_threads:false,
+        esbuild:false,
+        module:false,
+        'uglify-js':false,
+        '@swc/core':false,
+      },
+
       // These are the reasonable defaults supported by the Node ecosystem.
       // We also include JSX as a common component filename extension to support
       // some tools, although we do not recommend using it, see:
@@ -587,7 +608,7 @@ module.exports = function (webpackEnv) {
         },
       ].filter(Boolean),
     },
-    devtool:'inline-source-map',
+    devtool: 'inline-source-map',
     plugins: [
       // Generates an `index.html` file with the <script> injected.
       new HtmlWebpackPlugin(
@@ -636,6 +657,11 @@ module.exports = function (webpackEnv) {
       // during a production build.
       // Otherwise React will be compiled in the very slow development mode.
       new webpack.DefinePlugin(env.stringified),
+      new NodePolyfillPlugin(),
+      new webpack.ProvidePlugin({
+        Buffer: ['buffer', 'Buffer'],
+        process: 'process/browser',
+      }),
       // Experimental hot reloading for React .
       // https://github.com/facebook/react/tree/main/packages/react-refresh
       isEnvDevelopment &&
@@ -774,6 +800,7 @@ module.exports = function (webpackEnv) {
           },
         }),
     ].filter(Boolean),
+
     // Turn off performance processing because we utilize
     // our own hints via the FileSizeReporter
     performance: false,

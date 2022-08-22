@@ -1,39 +1,26 @@
 import React, { useState, useEffect } from 'react'
-import {
-  Table,
-  Input,
-  Button,
-  Popconfirm,
-  Form,
-  Modal,
-  message,
-  Space,
-  notification,
-} from 'antd'
+import { Table, Button, Popconfirm, message, Space, notification } from 'antd'
 import httpUtil from '../../../../utils/httpUtil'
+import dayjs from 'dayjs'
 import './styles.less'
 import { Link } from 'react-router-dom'
-import dayjs from 'dayjs'
+import { AddItemModal, ResultModal, UploadResultModal } from './commponents'
 export const Home = () => {
   // 获取userId
   const userId = sessionStorage.getItem('userId')
   //表格数据
   const [data, setData] = useState([])
-
   //当前页码
   const [page, setPage] = useState(1)
-
   //当前页容量
   const [pageSize, setPageSize] = useState(10)
-
   //添加项目表格显示情况
-  const [visible, setVisible] = useState(false)
-
+  const [addItemVisible, setAddItemVisible] = useState(false)
   const [showResultId, setShowResultId] = useState()
-
   const [allResults, setAllResults] = useState([])
-
-  const [resultModalVisible, setResultModalVisible] = useState(false)
+  const [resultVisible, setResultVisible] = useState(false)
+  const [uploadResultVisible, setUploadResultVisible] = useState(false)
+  const [uploadQuestionId, setUploadQuestionId] = useState()
   //表格列表
   const columns = [
     {
@@ -62,6 +49,14 @@ export const Home = () => {
             <Link to={`/selectaddress/${questionId}`}>
               {processState === 0 ? '准备数据' : '更改数据'}
             </Link>
+            <span
+              className="modify pointor_span"
+              onClick={() => {
+                openUploadResult(questionId)
+              }}
+            >
+              <font color="#1890ff">导入结果</font>
+            </span>
           </Space>
         )
       },
@@ -72,7 +67,6 @@ export const Home = () => {
       key: 'result',
       render: (e) => {
         const { questionId } = e
-
         return e.processState == 4 ? (
           <span
             className="pointor_span"
@@ -109,46 +103,10 @@ export const Home = () => {
       ),
     },
   ]
-  const resultcolumns = [
-    {
-      title: '结果创建时间',
-      dataIndex: 'createTime',
-      render: (_, record) => {
-        const { createTime } = record
-        const time = dayjs(createTime).format('YYYY-MM-DD HH:mm')
-        return time
-      },
-    },
-    {
-      title: '使用算法',
-      dataIndex: 'algorithm',
-      render: (e) => {
-        return e
-      },
-    },
-    {
-      title: '操作',
-      dataIndex: 'action',
-      width: 100,
-      render: (_, record) => {
-        const { routes } = record
-        return routes ? (
-          <Link to={`/result/${showResultId}/${record.finalSolutionId}`}>
-            前往查看
-          </Link>
-        ) : (
-          <font color="gray">暂无数据</font>
-        )
-      },
-    },
-  ]
+
   useEffect(() => {
     getQuestions()
   }, [userId])
-
-  // useEffect(() => {
-  //   getAllResults()
-  // }, [showResultId])
 
   useEffect(() => {
     notification.close('drawRoute')
@@ -168,12 +126,16 @@ export const Home = () => {
     })
   }
 
+  const openUploadResult = (questionId) => {
+    setUploadQuestionId(questionId)
+    setUploadResultVisible(true)
+  }
   const getAllResults = (id) => {
     setShowResultId(id)
     httpUtil.getSolution({ questionId: id }).then((res) => {
       if (res.status == 0) {
         setAllResults(res.data)
-        setResultModalVisible(true)
+        setResultVisible(true)
       } else {
         message('暂无数据')
       }
@@ -181,32 +143,9 @@ export const Home = () => {
   }
 
   const addItem = () => {
-    setVisible(!visible)
-  }
-  const closeResult = () => {
-    setResultModalVisible(false)
+    setAddItemVisible(true)
   }
 
-  const onFinish = (e) => {
-    const questionName = e.itemName
-    const data = {
-      questionName,
-      userId,
-    }
-    httpUtil.creatQuestion(data).then((res) => {
-      if (res.status == 9999) {
-        message.success('添加成功')
-        getQuestions()
-        setVisible(!visible)
-      } else {
-        message.error(res.msg)
-      }
-    })
-  }
-
-  const cancelAdd = () => {
-    setVisible(!visible)
-  }
   //获取所有项目
   const getQuestions = () => {
     const formdata = {
@@ -234,62 +173,16 @@ export const Home = () => {
             添加项目
           </Button>
         </div>
-        <div className="modal">
-          <Modal
-            title="新增订单"
-            onCancel={cancelAdd}
-            visible={visible}
-            key="addItemModal"
-            footer={null}
-            style={{ marginTop: '200px' }}
-          >
-            <Form
-              labelCol={{
-                span: 4,
-              }}
-              wrapperCol={{
-                span: 14,
-              }}
-              onFinish={onFinish}
-              layout="horizontal"
-              size="center"
-            >
-              <Form.Item
-                label="项目名称"
-                name="itemName"
-                style={{
-                  width: '500px',
-                }}
-              >
-                <Input
-                  bordered="false"
-                  placeholder="请输入项目名称"
-                  key="itemInput"
-                />
-              </Form.Item>
-              <Form.Item
-                style={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                }}
-              >
-                <Button type="primary" htmlType="submit" block key="submitItem">
-                  添加
-                </Button>
-              </Form.Item>
-            </Form>
-          </Modal>
-        </div>
         <div className="table_wrap">
           <Table
             bordered
             size="large"
-            scroll={{y:500}}
+            scroll={{ y: 500 }}
             rowKey={(record) => record.questionId}
             key="itemTable"
             pagination={{
               total: data.length,
-              pageSizeOptions: [6, 10, 20, 30,data.length],
+              pageSizeOptions: [6, 10, 20, 30, data.length],
               defaultPageSize: pageSize,
               current: page,
               onChange: (page, pageSize) => {
@@ -301,25 +194,24 @@ export const Home = () => {
           />
         </div>
       </div>
-      <Modal
-        visible={resultModalVisible}
-        key="resultModal"
-        width="600px"
-        zIndex="1001"
-        title="所有结果"
-        onCancel={closeResult}
-        footer={
-          <Button type="primary" key="ok" onClick={closeResult}>
-            确认
-          </Button>
-        }
-      >
-        <Table
-          columns={resultcolumns}
-          dataSource={allResults}
-          key="resultsTable"
-        />
-      </Modal>
+      <AddItemModal
+        addItemVisible={addItemVisible}
+        setAddItemVisible={setAddItemVisible}
+        getQuestions={getQuestions}
+        userId={userId}
+      />
+      <ResultModal
+        setResultVisible={setResultVisible}
+        showResultId={showResultId}
+        resultVisible={resultVisible}
+        allResults={allResults}
+      />
+      <UploadResultModal
+        uploadResultVisible={uploadResultVisible}
+        setUploadResultVisible={setUploadResultVisible}
+        uploadQuestionId={uploadQuestionId}
+        getQuestions={getQuestions}
+      />
     </div>
   )
 }
