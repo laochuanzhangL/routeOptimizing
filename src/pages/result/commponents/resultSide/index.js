@@ -23,7 +23,7 @@ export const ResultSide = (props) => {
       dataIndex: 'vehicle',
       width: 100,
       render: (render) => {
-        return render.vehicleNumber
+        return render.vehicleNumber ?? `虚拟车 ${render.vehicleId}`
       },
     },
 
@@ -149,7 +149,9 @@ export const ResultSide = (props) => {
           type,
           path,
           distance: carDistance[vehicleId],
+          vehicleId,
         }
+        console.log(data)
         setData(data)
       }
     })
@@ -168,8 +170,7 @@ export const ResultSide = (props) => {
   //到处文本结果
   const downloadResults = () => {
     httpUtil.downloadResultsFile({ finalSolutionId }).then((res) => {
-      console.log(res)
-      exportFile(res,'123')
+      exportFile(res, '123')
     })
   }
   return (
@@ -232,7 +233,13 @@ export const ResultSide = (props) => {
         className="text_result"
         title={
           <div className="text_result_title">
-            <div>{data ? `${data.type}  :  ${data.vehicleNumber}` : ''}</div>
+            <div>
+              {data
+                ? `${data.type ?? '虚拟车'} : ${
+                    data.vehicleNumber || data.vehicleId
+                  }`
+                : ''}
+            </div>
             <div className="distance">
               总里程:
               {data && data.distance

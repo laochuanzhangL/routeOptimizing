@@ -44,7 +44,6 @@ export const UploadResultModal = (props) => {
       formData.append('file', fileList[0].originFileObj)
       setLoading(true)
       httpUtil.uploadResultFile(formData).then((res) => {
-        console.log(res)
         setLoading(false)
         if (res.status === 200) {
           message.success('文件上传成功')

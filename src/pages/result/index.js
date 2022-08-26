@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom'
 import './styles.less'
 export const Result = () => {
   const routeParams = useParams()
-  const { finalSolutionId,questionId } = routeParams
+  const { finalSolutionId, questionId } = routeParams
   const [sideVisible, setSideVisible] = useState(true)
   const [center, setCenter] = useState({
     lng: 116.402544,
@@ -28,11 +28,11 @@ export const Result = () => {
     getRoutes()
     getCars()
     getNodes()
-    return(()=>{
+    return () => {
       setcarRoutes([])
       setCars([])
       setNodes([])
-    })
+    }
   }, [questionId])
 
   useEffect(() => {
@@ -43,9 +43,9 @@ export const Result = () => {
   useEffect(() => {
     initMap()
     openNotification()
-    return(()=>{
+    return () => {
       setTrackAnis([])
-    })
+    }
   }, [carRoutes])
 
   useEffect(() => {
@@ -64,7 +64,7 @@ export const Result = () => {
     }
     httpUtil.getResultRoutes(parmas).then((res) => {
       if (res.status === 0) {
-          setcarRoutes(res.data.routes)
+        setcarRoutes(res.data.routes)
       }
     })
   }
@@ -80,7 +80,7 @@ export const Result = () => {
           centerNodes.push(point)
         }
       })
-      const { center } = map.getViewport(centerNodes)
+      const { center } = map.getViewport(centerNodes, { enableAnimation: true })
       setCenter(center)
     }
   }
@@ -88,7 +88,7 @@ export const Result = () => {
   const alterCenter = () => {
     //如果map存在 进行中心点的变化
     if (map) {
-      map.centerAndZoom(new BMap.Point(center.lng, center.lat), 14)
+      map.centerAndZoom(new BMap.Point(center.lat, center.lng), 14)
     }
   }
   //初始化地图
@@ -148,7 +148,7 @@ export const Result = () => {
     }
   }
   //
-  const getPath = async (map, route,color) => {
+  const getPath = async (map, route, color) => {
     const points = []
     const driving = new BMap.DrivingRoute(map)
     const { lat: lat1, lng: lng1 } = route[0]
@@ -156,7 +156,7 @@ export const Result = () => {
     let point1 = new BMap.Point(lng1, lat1)
     let point2 = new BMap.Point(lng2, lat2)
     driving.search(point1, point2)
-    let distance=0
+    let distance = 0
     function judge(driving) {
       return new Promise((resolve, reject) => {
         driving.setSearchCompleteCallback(function () {
@@ -180,7 +180,7 @@ export const Result = () => {
       })
     }
     let i = 1
-    while (i < route.length-1) {
+    while (i < route.length - 1) {
       const res = await judge(driving)
       const { lat: lat1, lng: lng1 } = route[i]
       const { lat: lat2, lng: lng2 } = route[i + 1]
@@ -207,10 +207,10 @@ export const Result = () => {
       const { vehicleId } = vehicle
       const color = getRandomColor(colors)
       setColors([...colors, color])
-      const p = getPath(map, route,color)
+      const p = getPath(map, route, color)
       p.then((res) => {
         const { points, distance } = res
-        carRoutes[i].distance=distance
+        carRoutes[i].distance = distance
         const lushu = new BMapLib.LuShu(map, points, {
           landmarkPois: [],
           speed: distance / 15 > 8000 ? 8000 : distance / 15,
@@ -220,11 +220,11 @@ export const Result = () => {
           autoView: false,
           enableRotation: false,
         })
-      
+
         path.push({
           trackAni: lushu,
           vehicleId,
-          distance:distance,
+          distance: distance,
           isRunning: false,
         })
         if (path.length == pathLen) {
