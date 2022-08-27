@@ -91,7 +91,7 @@ export const Result = () => {
   const alterCenter = () => {
     //如果map存在 进行中心点的变化
     if (map) {
-      map.centerAndZoom(new BMap.Point(center.lat, center.lng), 14)
+      map.centerAndZoom(new BMap.Point(center.lng, center.lat), 14)
     }
   }
   //初始化地图
