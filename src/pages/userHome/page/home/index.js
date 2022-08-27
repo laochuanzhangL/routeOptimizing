@@ -13,7 +13,7 @@ export const Home = () => {
   //当前页码
   const [page, setPage] = useState(1)
   //当前页容量
-  const [pageSize, setPageSize] = useState(10)
+  const [pageSize, setPageSize] = useState(10000)
   //添加项目表格显示情况
   const [addItemVisible, setAddItemVisible] = useState(false)
   const [showResultId, setShowResultId] = useState()
@@ -180,15 +180,7 @@ export const Home = () => {
             scroll={{ y: 500 }}
             rowKey={(record) => record.questionId}
             key="itemTable"
-            pagination={{
-              total: data.length,
-              pageSizeOptions: [6, 10, 20, 30, data.length],
-              defaultPageSize: pageSize,
-              current: page,
-              onChange: (page, pageSize) => {
-                setPage(page), setPageSize(pageSize)
-              },
-            }}
+            pagination={false}
             dataSource={data}
             columns={columns}
           />

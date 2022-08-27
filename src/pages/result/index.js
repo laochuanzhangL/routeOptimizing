@@ -203,6 +203,7 @@ export const Result = () => {
     const path = []
     const pathLen = carRoutes.length
     setColors([])
+    console.log(carRoutes)
     for (let i = 0; i < carRoutes.length; i++) {
       const points = []
       const driving = new BMap.DrivingRoute(map)
@@ -216,14 +217,13 @@ export const Result = () => {
         carRoutes[i].distance = distance
         const lushu = new BMapLib.LuShu(map, points, {
           landmarkPois: [],
-          speed: distance / 15 > 8000 ? 8000 : distance / 15,
+          speed: distance / 45 > 2000 ? 2000 : distance / 45,
           icon: new BMap.Icon(`${car}`, new BMap.Size(24, 24), {
             anchor: new BMap.Size(5, 10),
           }),
-          autoView: false,
+          autoView: true,
           enableRotation: false,
         })
-
         path.push({
           trackAni: lushu,
           vehicleId,
