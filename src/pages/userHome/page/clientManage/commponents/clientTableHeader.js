@@ -6,13 +6,7 @@ import httpUtil from '../../../../../utils/httpUtil'
 import throttle from 'lodash/throttle'
 import { InboxOutlined } from '@ant-design/icons'
 export const ClientTableHeader = (props) => {
-  const {
-    getClients,
-    pageSize,
-    pageNum,
-    setClients,
-    setClientLen,
-  } = props
+  const { getClients, pageSize, pageNum, setClients, setClientLen } = props
   const { Search } = Input
   const [uploadVisible, setUploadVisible] = useState(false)
   const [fileList, setFileList] = useState([])
@@ -71,7 +65,6 @@ export const ClientTableHeader = (props) => {
 
   //查找用户
   const clientSearch = (e) => {
-    console.log(e)
     let keyValue = e.target.value
     let params = { keyValue, pageNum, pageSize }
     httpUtil.searchClients(params).then((res) => {
@@ -81,6 +74,7 @@ export const ClientTableHeader = (props) => {
       }
     })
   }
+  //节流操作
   const throttleSearh = throttle((e) => clientSearch(e), 500)
 
   return (

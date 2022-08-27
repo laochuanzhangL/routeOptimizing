@@ -71,17 +71,20 @@ export const Result = () => {
   //获得最初地图中心点（可以看到该项目所有中心点的最佳位置）
   const getBeginCenter = () => {
     if (nodes.length && map) {
-      let centerNodes = []
-      nodes.map((item) => {
-        const { isCenter } = item
-        if (isCenter) {
-          const { lat, lng } = item
-          let point = new BMap.Point(lng, lat)
-          centerNodes.push(point)
-        }
-      })
-      const { center } = map.getViewport(centerNodes, { enableAnimation: true })
-      setCenter(center)
+      // let centerNodes = []
+      // nodes.map((item) => {
+      //   const { isCenter } = item
+      //   if (isCenter) {
+      //     const { lat, lng } = item
+      //     let point = new BMap.Point(lng, lat)
+      //     centerNodes.push(point)
+      //   }
+      // })
+      // const { center } = map.getViewport(centerNodes, { enableAnimation: true })
+      // setCenter(center)
+      const { lat, lng } = nodes[0]
+      let point = new BMap.Point(lng, lat)
+      setCenter(point)
     }
   }
   //修改中心点
