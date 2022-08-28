@@ -5,6 +5,7 @@ import { ImportOutlined, UserAddOutlined } from '@ant-design/icons'
 import { useHistory } from 'react-router'
 import { useState } from 'react'
 import httpUtil from '../../../utils/httpUtil'
+import throttle from 'lodash/throttle'
 export const SelectHeader = (props) => {
   const [clients, setClients] = useState([])
   const [pageNum, setPageNum] = useState(1)
@@ -113,6 +114,20 @@ export const SelectHeader = (props) => {
     defaultSelectedRowKeys: getNodesId(),
     onChange: clientsSelectChange,
   }
+
+    //查找用户
+    const clientsSearch = (e) => {
+      let keyValue = e.target.value
+      let params = { keyValue, pageNum, pageSize }
+      httpUtil.searchClients(params).then((res) => {
+        if (res.status == 9999) {
+          setClientLen(res.data.total)
+          setClients(res.data.records)
+        }
+      })
+    }
+    const throttleSearh = throttle((e) => clientsSearch(e), 500)
+
   return (
     <div className="selectAddress_header">
       <div className="search_wrap">
@@ -187,7 +202,7 @@ export const SelectHeader = (props) => {
           <Search
             key="clientsMapSearch"
             placeholder="请输入目标编号/名称/地址/经纬度"
-            // onChange={clientsSearch}
+            onChange={throttleSearh}
             enterButton
           />
         </div>

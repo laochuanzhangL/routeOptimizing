@@ -2,6 +2,7 @@ import React from 'react'
 import { useState, useEffect } from 'react'
 import { Table, Input, Button, Popconfirm, message, Space, Modal } from 'antd'
 import httpUtil from '../../../utils/httpUtil'
+import throttle from 'lodash/throttle'
 export const AddClientTables = (props) => {
   const [detailsVisible, setDetailsVisible] = useState(false)
   const [selectedRowKeys, setSelectedRowKeys] = useState([])
@@ -174,6 +175,20 @@ export const AddClientTables = (props) => {
       </div>
     )
   }
+   //查找站点
+   const detailSearch = (e) => {
+    let keyValue = e.target.value
+    let params = { keyValue, pageNum, pageSize }
+    httpUtil.searchClients(params).then((res) => {
+      if (res.status == 9999) {
+        setClients(res.data.records)
+        setClientsLen(res.data.total)
+      }
+    })
+  }
+
+  const throttleSearh = throttle((e) => detailSearch(e), 500)
+
   return (
     <div className="nodes">
       <Table
@@ -223,7 +238,7 @@ export const AddClientTables = (props) => {
           <Search
             key="clientDetailsSearch"
             placeholder="请输入目标编号/名称/地址/经纬度"
-            // onChange={detailSearch}
+            onChange={throttleSearh}
             enterButton
           />
         </div>
