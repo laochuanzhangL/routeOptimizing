@@ -1,5 +1,5 @@
-import React, { useState, useEffect, Fragment } from 'react'
-import { Drawer, Button, Table, message, Modal } from 'antd'
+import React, { useState, useEffect } from 'react'
+import { Drawer, Button, Table, message, Modal, Spin } from 'antd'
 import { RightOutlined, DownloadOutlined } from '@ant-design/icons'
 import './styles.less'
 import httpUtil from '../../../../utils/httpUtil'
@@ -16,6 +16,7 @@ export const ResultSide = (props) => {
   const [textVisible, setTextVisible] = useState(false)
   const [showCarId, setShowCarId] = useState()
   const [carDistance, setCarDistance] = useState({})
+  const [downLoading, setDownLoading] = useState(false)
   const [data, setData] = useState()
   const resultsColumns = [
     {
@@ -60,7 +61,7 @@ export const ResultSide = (props) => {
     {
       title: '顺序号',
       dataIndex: 'id',
-      width: 50,
+      width: 80,
       render: (render) => {
         return render
       },
@@ -79,6 +80,14 @@ export const ResultSide = (props) => {
       width: 250,
       render: (render) => {
         return render
+      },
+    },
+    {
+      title: '里程',
+      dataIndex: 'dis',
+      width: 100,
+      render: (render) => {
+        return render ?? '加载中'
       },
     },
   ]
@@ -141,8 +150,8 @@ export const ResultSide = (props) => {
         let path = []
         const len = route.length
         for (let i = 0; i < len; i++) {
-          const { nodeName, nodeAddress } = route[i]
-          path.push({ nodeName, nodeAddress, id: i + 1 })
+          const { nodeName, nodeAddress, dis } = route[i]
+          path.push({ nodeName, nodeAddress, id: i + 1, dis })
         }
         const data = {
           vehicleNumber,
@@ -151,7 +160,6 @@ export const ResultSide = (props) => {
           distance: carDistance[vehicleId],
           vehicleId,
         }
-        console.log(data)
         setData(data)
       }
     })
@@ -169,8 +177,10 @@ export const ResultSide = (props) => {
 
   //到处文本结果
   const downloadResults = () => {
+    setDownLoading(true)
     httpUtil.downloadResultsFile({ finalSolutionId }).then((res) => {
       exportFile(res, '123')
+      setDownLoading(false)
     })
   }
   return (
@@ -180,13 +190,20 @@ export const ResultSide = (props) => {
         title={
           <div className="drawer_title">
             <div>计算结果</div>{' '}
-            <Button
-              type="primary"
-              icon={<DownloadOutlined />}
-              onClick={downloadResults}
-            >
-              导出
-            </Button>
+            {downLoading ? (
+              <Spin
+                className="spin"
+                style={{ marginTop: '6px', marginRight: '15px' }}
+              />
+            ) : (
+              <Button
+                type="primary"
+                icon={<DownloadOutlined />}
+                onClick={downloadResults}
+              >
+                导出
+              </Button>
+            )}
           </div>
         }
         placement="right"

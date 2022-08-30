@@ -221,7 +221,7 @@ export const SelectHeader = (props) => {
             total: clientLen,
             defaultPageSize: pageSize,
             showSizeChanger: true,
-            pageSizeOptions: [2, 20, 50, 100, clients.length],
+            pageSizeOptions: [8, 20, 50, 100, clientLen,],
             current: pageNum,
             onShowSizeChange: (current, pageSize) => {
               console.log(current, pageSize)

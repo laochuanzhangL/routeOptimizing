@@ -107,7 +107,7 @@ export const Result = () => {
   const addMarker = () => {
     if (map && nodes.length) {
       nodes.map((item) => {
-        const { nodeName, lat, lng, isCenter } = item
+        const { nodeName, lat, lng, isCenter, nodeAddress } = item
         let point = new BMap.Point(lng, lat)
         var myIcon = new BMap.Icon(
           `${isCenter ? blueMark : redMark}`,
@@ -118,23 +118,25 @@ export const Result = () => {
           }
         )
         let marker = new BMap.Marker(point, { icon: myIcon })
-        map.addOverlay(marker)
         marker.addEventListener('mouseover', function (e) {
-          controlInfo(map, isCenter, nodeName, point, true)
+          controlInfo(map, isCenter, nodeName, nodeAddress, point, true)
         })
+        setTimeout(() => {
+          map.addOverlay(marker)
+        }, 300)
       })
     }
   }
 
   //鼠标移入标记点中展示信息框
-  const controlInfo = (map, isCenter, nodeName, point, isOpen) => {
+  const controlInfo = (map, isCenter, nodeName, nodeAddress, point, isOpen) => {
     let opts = {
       width: 200,
       height: 100,
       title: !isCenter ? '站点:' : '中心点:',
       offset: new BMap.Size(7, 5),
     }
-    let infoWindow = new BMap.InfoWindow(`${nodeName}`, opts)
+    let infoWindow = new BMap.InfoWindow(`${nodeAddress}`, opts)
     if (isOpen) {
       map.openInfoWindow(infoWindow, point)
     }
@@ -153,13 +155,13 @@ export const Result = () => {
   //
   const getPath = async (map, route, color) => {
     const points = []
+    let totalDistance = 0
     const driving = new BMap.DrivingRoute(map)
     const { lat: lat1, lng: lng1 } = route[0]
     const { lat: lat2, lng: lng2 } = route[1]
     let point1 = new BMap.Point(lng1, lat1)
     let point2 = new BMap.Point(lng2, lat2)
     driving.search(point1, point2)
-    let distance = 0
     function judge(driving) {
       return new Promise((resolve, reject) => {
         driving.setSearchCompleteCallback(function () {
@@ -172,12 +174,12 @@ export const Result = () => {
           map.addOverlay(polyline)
           if (pts.length) {
             if (dis[dis.length - 1] == '里') {
-              distance = distance + parseFloat(dis) * 1000
+              totalDistance = totalDistance + parseFloat(dis) * 1000
             } else {
-              distance = distance + parseFloat(dis)
+              totalDistance = totalDistance + parseFloat(dis)
             }
             points.push.apply(points, pts)
-            resolve({ points, distance })
+            resolve({ points, totalDistance, dis })
           }
         })
       })
@@ -185,15 +187,19 @@ export const Result = () => {
     let i = 1
     while (i < route.length - 1) {
       const res = await judge(driving)
+      route[i - 1].dis = res.dis
       const { lat: lat1, lng: lng1 } = route[i]
-      const { lat: lat2, lng: lng2 } = route[i + 1]
+      const { lat: lat2, lng: lng2 } = route[i+1]
       let point1 = new BMap.Point(lng1, lat1)
       let point2 = new BMap.Point(lng2, lat2)
       driving.search(point1, point2)
       i++
     }
+    const res = await judge(driving)
+    route[route.length - 2].dis = res.dis
+    route[route.length - 1].dis = '终点'
     return new Promise((resolve, reject) => {
-      resolve({ points, distance })
+      resolve({ points, totalDistance })
     })
   }
 
@@ -203,7 +209,6 @@ export const Result = () => {
     const path = []
     const pathLen = carRoutes.length
     setColors([])
-    console.log(carRoutes)
     for (let i = 0; i < carRoutes.length; i++) {
       const points = []
       const driving = new BMap.DrivingRoute(map)
@@ -213,11 +218,23 @@ export const Result = () => {
       setColors([...colors, color])
       const p = getPath(map, route, color)
       p.then((res) => {
-        const { points, distance } = res
-        carRoutes[i].distance = distance
+        const { points, totalDistance } = res
+        carRoutes[i].totalDistance = totalDistance
+        let speed
+        if (totalDistance / 1000 > 1000) {
+          speed = totalDistance / 120
+        } else if (totalDistance / 1000 > 500) {
+          speed = totalDistance / 100
+        } else if (totalDistance / 1000 > 200) {
+          speed = totalDistance / 80
+        } else if (totalDistance / 1000 > 100) {
+          speed = totalDistance / 60
+        } else if (totalDistance / 1000 > 50) {
+          speed = totalDistance / 35
+        } else speed = totalDistance / 25
         const lushu = new BMapLib.LuShu(map, points, {
           landmarkPois: [],
-          speed: distance / 45 > 2000 ? 2000 : distance / 45,
+          speed: speed,
           icon: new BMap.Icon(`${car}`, new BMap.Size(24, 24), {
             anchor: new BMap.Size(5, 10),
           }),
@@ -227,7 +244,7 @@ export const Result = () => {
         path.push({
           trackAni: lushu,
           vehicleId,
-          distance: distance,
+          distance: totalDistance,
           isRunning: false,
         })
         if (path.length == pathLen) {
@@ -269,7 +286,6 @@ export const Result = () => {
       finalSolutionId,
     }
     httpUtil.getResultNodes(params).then((res) => {
-      console.log(res)
       if (res.status == 0) {
         setNodes([...res.data])
       }

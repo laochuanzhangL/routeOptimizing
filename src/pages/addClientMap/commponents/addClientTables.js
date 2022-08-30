@@ -257,7 +257,7 @@ export const AddClientTables = (props) => {
             total: clientsLen,
             defaultPageSize: pageSize,
             showSizeChanger: true,
-            pageSizeOptions: [2, 20, 50, 100, clientsLen],
+            pageSizeOptions: [8, 20, 50, 100, clientsLen],
             current: pageNum,
             onChange: (page, pageSize) => {
               setPageNum(page), setPageSize(pageSize)

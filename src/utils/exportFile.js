@@ -1,5 +1,5 @@
 //用于下载文件
-export const exportFile = (content, customFileName, type) => {
+export const exportFile = (content, customFileName, type, callback) => {
   let blob = new Blob([content], { type: type || 'application/vnd.ms-excel' }) // 默认excel
   let filename = content.filename || customFileName
   let URL = window.URL || window.webkitURL

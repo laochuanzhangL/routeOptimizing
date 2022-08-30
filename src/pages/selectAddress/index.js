@@ -1,4 +1,3 @@
-import axios from 'axios'
 import React from 'react'
 import { useState, useEffect } from 'react'
 import { Map, Marker, NavigationControl, InfoWindow } from 'react-bmapgl'
