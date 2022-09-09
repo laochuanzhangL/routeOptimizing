@@ -121,6 +121,7 @@ export const Result = () => {
         marker.addEventListener('mouseover', function (e) {
           controlInfo(map, isCenter, nodeName, nodeAddress, point, true)
         })
+        marker.disableMassClear()
         setTimeout(() => {
           map.addOverlay(marker)
         }, 300)
@@ -152,7 +153,7 @@ export const Result = () => {
       }
     }
   }
-  //
+  //用于获取route再地图上面的路线
   const getPath = async (map, route, color) => {
     const points = []
     let totalDistance = 0
@@ -170,7 +171,9 @@ export const Result = () => {
           const polyline = new BMap.Polyline(pts, {
             strokeColor: color,
             strokeWeight: 4,
+            
           })
+          polyline.disableMassClear()
           map.addOverlay(polyline)
           if (pts.length) {
             if (dis[dis.length - 1] == '里') {
@@ -189,7 +192,7 @@ export const Result = () => {
       const res = await judge(driving)
       route[i - 1].dis = res.dis
       const { lat: lat1, lng: lng1 } = route[i]
-      const { lat: lat2, lng: lng2 } = route[i+1]
+      const { lat: lat2, lng: lng2 } = route[i + 1]
       let point1 = new BMap.Point(lng1, lat1)
       let point2 = new BMap.Point(lng2, lat2)
       driving.search(point1, point2)
@@ -232,6 +235,7 @@ export const Result = () => {
         } else if (totalDistance / 1000 > 50) {
           speed = totalDistance / 35
         } else speed = totalDistance / 25
+        speed = speed < 1000 ? 1000 : speed
         const lushu = new BMapLib.LuShu(map, points, {
           landmarkPois: [],
           speed: speed,
@@ -379,6 +383,7 @@ export const Result = () => {
         trackAnis={trackAnis}
         finalSolutionId={finalSolutionId}
         carRoutes={carRoutes}
+        map={map}
         routeLoading={routeLoading}
       />
     </div>

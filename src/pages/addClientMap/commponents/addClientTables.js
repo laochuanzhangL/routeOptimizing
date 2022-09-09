@@ -73,7 +73,7 @@ export const AddClientTables = (props) => {
   ]
   useEffect(() => {
     getClients()
-  }, [pageNum, pageSize,nodes])
+  }, [pageNum, pageSize, nodes])
 
   //获取所有客户
   const getClients = () => {
@@ -175,8 +175,8 @@ export const AddClientTables = (props) => {
       </div>
     )
   }
-   //查找站点
-   const detailSearch = (e) => {
+  //查找站点
+  const detailSearch = (e) => {
     let keyValue = e.target.value
     let params = { keyValue, pageNum, pageSize }
     httpUtil.searchClients(params).then((res) => {

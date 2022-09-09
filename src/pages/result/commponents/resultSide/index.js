@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Drawer, Button, Table, message, Modal, Spin } from 'antd'
 import { RightOutlined, DownloadOutlined } from '@ant-design/icons'
+import car from '../../../../assets/car.png'
 import './styles.less'
 import httpUtil from '../../../../utils/httpUtil'
 import { exportFile } from '../../../../utils/exportFile'
@@ -12,12 +13,14 @@ export const ResultSide = (props) => {
     trackAnis,
     routeLoading,
     finalSolutionId,
+    map,
   } = props
   const [textVisible, setTextVisible] = useState(false)
-  const [showCarId, setShowCarId] = useState()
   const [carDistance, setCarDistance] = useState({})
   const [downLoading, setDownLoading] = useState(false)
   const [data, setData] = useState()
+  const [showTrackAnis, setShowTrackAni] = useState([])
+  const { BMap, BMapLib } = window
   const resultsColumns = [
     {
       title: '车牌号',
@@ -63,7 +66,7 @@ export const ResultSide = (props) => {
       dataIndex: 'id',
       width: 80,
       render: (render) => {
-        return render
+        return render + 1
       },
     },
     {
@@ -90,6 +93,22 @@ export const ResultSide = (props) => {
         return render ?? '加载中'
       },
     },
+    {
+      title: '操作',
+      width: 80,
+      render: (render) => {
+        return (
+          <span
+            style={{ color: '#1890ff', cursor: 'pointer', display: 'block' }}
+            onClick={() => {
+              onePointAnimation(render)
+            }}
+          >
+            {render.id === data.path.length - 1 ? '' : '单点动画'}
+          </span>
+        )
+      },
+    },
   ]
 
   // useEffect(() => {
@@ -102,10 +121,20 @@ export const ResultSide = (props) => {
 
   useEffect(() => {
     openText()
-    return () => {
-      setTextVisible(false)
-    }
   }, [data])
+  //页面播放的动画只能有一条
+  useEffect(() => {
+    showTrackAnisChange()
+  }, [showTrackAnis])
+  const showTrackAnisChange = () => {
+    while (showTrackAnis.length > 1) {
+      let temp = showTrackAnis.shift()
+      temp.stop()
+      temp.hideInfoWindow()
+    }
+    map?.clearOverlays()
+    showTrackAnis[0]?.start()
+  }
 
   const closeSide = () => {
     setSideVisible(false)
@@ -124,15 +153,9 @@ export const ResultSide = (props) => {
   const startTrackAnis = (id) => {
     if (!routeLoading) {
       trackAnis.map((item) => {
-        let { trackAni, vehicleId, isRunning } = item
+        let { trackAni, vehicleId } = item
         if (vehicleId === id) {
-          if (!isRunning) {
-            trackAni.start()
-            item.isRunning = !isRunning
-          } else {
-            trackAni.stop()
-            item.isRunning = !isRunning
-          }
+          setShowTrackAni([...showTrackAnis, trackAni])
         }
       })
     } else {
@@ -150,8 +173,8 @@ export const ResultSide = (props) => {
         let path = []
         const len = route.length
         for (let i = 0; i < len; i++) {
-          const { nodeName, nodeAddress, dis } = route[i]
-          path.push({ nodeName, nodeAddress, id: i + 1, dis })
+          const { nodeName, nodeAddress, dis, lat, lng } = route[i]
+          path.push({ nodeName, nodeAddress, id: i, dis, lat, lng })
         }
         const data = {
           vehicleNumber,
@@ -162,6 +185,52 @@ export const ResultSide = (props) => {
         }
         setData(data)
       }
+    })
+  }
+  //单点动画
+  const onePointAnimation = (cur) => {
+    setTextVisible(false)
+    const driving = new BMap.DrivingRoute(map)
+    const { id, lat: curLat, lng: curLng } = cur
+    const next = data.path[id + 1]
+    const { lat: nextLat, lng: nextLng } = next
+    let curPoint = new BMap.Point(curLng, curLat)
+    let nextPoint = new BMap.Point(nextLng, nextLat)
+    driving.search(curPoint, nextPoint)
+    driving.setSearchCompleteCallback(function () {
+      const pts = driving.getResults().getPlan(0).getRoute(0).getPath()
+      let dis = driving.getResults().getPlan(0).getDistance()
+      if (dis[dis.length - 1] == '里') {
+        dis = parseFloat(dis) * 1000
+      } else {
+        dis = parseFloat(dis)
+      }
+      let speed
+      if (dis / 1000 > 1000) {
+        speed = dis / 120
+      } else if (dis / 1000 > 500) {
+        speed = dis / 100
+      } else if (dis / 1000 > 200) {
+        speed = dis / 80
+      } else if (dis / 1000 > 100) {
+        speed = dis / 60
+      } else if (dis / 1000 > 50) {
+        speed = dis / 30
+      } else if (dis / 1000 > 10) {
+        speed = dis / 20
+      } else if (dis > 1000) {
+        speed = dis / 10
+      } else speed = dis / 5
+      const lushu = new BMapLib.LuShu(map, pts, {
+        landmarkPois: [],
+        speed: speed,
+        icon: new BMap.Icon(`${car}`, new BMap.Size(24, 24), {
+          anchor: new BMap.Size(5, 10),
+        }),
+        autoView: true,
+        enableRotation: false,
+      })
+      setShowTrackAni([...showTrackAnis, lushu])
     })
   }
   //打开文本轨迹
@@ -181,6 +250,7 @@ export const ResultSide = (props) => {
     httpUtil.downloadResultsFile({ finalSolutionId }).then((res) => {
       exportFile(res, '123')
       setDownLoading(false)
+      message.success('下载成功')
     })
   }
   return (
