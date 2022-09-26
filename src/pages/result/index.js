@@ -119,7 +119,16 @@ export const Result = () => {
         )
         let marker = new BMap.Marker(point, { icon: myIcon })
         marker.addEventListener('mouseover', function (e) {
-          controlInfo(map, isCenter, nodeName, nodeAddress, point, true)
+          controlInfo(
+            map,
+            isCenter,
+            nodeName,
+            nodeAddress,
+            point,
+            true,
+            lat,
+            lng
+          )
         })
         marker.disableMassClear()
         setTimeout(() => {
@@ -130,11 +139,21 @@ export const Result = () => {
   }
 
   //鼠标移入标记点中展示信息框
-  const controlInfo = (map, isCenter, nodeName, nodeAddress, point, isOpen) => {
+  const controlInfo = (
+    map,
+    isCenter,
+    nodeName,
+    nodeAddress,
+    point,
+    isOpen,
+    lat,
+    lng
+  ) => {
     let opts = {
       width: 200,
       height: 100,
-      title: !isCenter ? '站点:' : '中心点:',
+      // title: !isCenter ? '站点:' : '中心点:',
+      title: lat + ',' + lng,
       offset: new BMap.Size(7, 5),
     }
     let infoWindow = new BMap.InfoWindow(`${nodeAddress}`, opts)
@@ -171,7 +190,6 @@ export const Result = () => {
           const polyline = new BMap.Polyline(pts, {
             strokeColor: color,
             strokeWeight: 4,
-            
           })
           polyline.disableMassClear()
           map.addOverlay(polyline)
@@ -285,6 +303,7 @@ export const Result = () => {
       getRandomColor(exist_color)
     }
   }
+  //获取所有点
   const getNodes = () => {
     const params = {
       finalSolutionId,
@@ -295,6 +314,7 @@ export const Result = () => {
       }
     })
   }
+  //获取所有车辆
   const getCars = () => {
     const params = {
       questionId,
@@ -309,7 +329,7 @@ export const Result = () => {
   const showSide = () => {
     setSideVisible(true)
   }
-
+  //路线绘制的提示信息
   const openNotification = (allTime) => {
     notification.open({
       message: '路线绘制中......',
