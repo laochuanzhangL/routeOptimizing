@@ -5,6 +5,7 @@ import { exportFile } from '../../../../../utils/exportFile'
 import httpUtil from '../../../../../utils/httpUtil'
 import throttle from 'lodash/throttle'
 import { InboxOutlined } from '@ant-design/icons'
+
 export const ClientTableHeader = (props) => {
   const { getClients, pageSize, pageNum, setClients, setClientLen } = props
   const { Search } = Input
@@ -15,12 +16,12 @@ export const ClientTableHeader = (props) => {
   const history = useHistory()
   //上传的配置参数
   const uploadProps = {
-    fileList: fileList,
+    fileList,
     beforeUpload(info) {
       //文件类型校验
       const fileType = info.name.split('.').pop()
       if (fileType !== 'xlsx' && fileType !== 'xls') {
-        message.error(`上传失败：上传文件格式非excel文件格式`)
+        message.error(`上传失败:上传文件格式非excel文件格式`)
       }
       return false
     },
@@ -33,12 +34,14 @@ export const ClientTableHeader = (props) => {
       }
     },
   }
+  
   //下载文件
   const downloadFile = () => {
     httpUtil.downloadNodesFile().then((res) => {
       exportFile(res, '选点模板文件')
     })
   }
+
   //手动上传文件
   const handleUpload = () => {
     if (fileList && fileList.length) {
@@ -110,6 +113,7 @@ export const ClientTableHeader = (props) => {
           enterButton
         />
       </div>
+      {/* 文件上传对话框 */}
       <Modal
         key="nodesUploadModal"
         visible={uploadVisible}
