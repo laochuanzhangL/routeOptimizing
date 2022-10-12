@@ -194,8 +194,8 @@ export const ResultSide = (props) => {
     const { id, lat: curLat, lng: curLng } = cur
     const next = data.path[id + 1]
     const { lat: nextLat, lng: nextLng } = next
-    let curPoint = new BMap.Point(curLng, curLat)
-    let nextPoint = new BMap.Point(nextLng, nextLat)
+    let curPoint = new BMap.Point(curLng+ 0.00658, curLat+0.00574)
+    let nextPoint = new BMap.Point(nextLng+ 0.00658, nextLat+0.00574)
     driving.search(curPoint, nextPoint)
     driving.setSearchCompleteCallback(function () {
       const pts = driving.getResults().getPlan(0).getRoute(0).getPath()

@@ -107,7 +107,10 @@ export const Result = () => {
   const addMarker = () => {
     if (map && nodes.length) {
       nodes.map((item) => {
-        const { nodeName, lat, lng, isCenter, nodeAddress } = item
+        let { nodeName, lat, lng, isCenter, nodeAddress } = item
+        console.log(nodeName)
+        lng += 0.00658
+        lat += 0.00574
         let point = new BMap.Point(lng, lat)
         var myIcon = new BMap.Icon(
           `${isCenter ? blueMark : redMark}`,
@@ -152,11 +155,10 @@ export const Result = () => {
     let opts = {
       width: 200,
       height: 100,
-      // title: !isCenter ? '站点:' : '中心点:',
-      title: lat + ',' + lng,
+      title: !isCenter ? '站点:' : '中心点:',
       offset: new BMap.Size(7, 5),
     }
-    let infoWindow = new BMap.InfoWindow(`${nodeAddress}`, opts)
+    let infoWindow = new BMap.InfoWindow(`${nodeName}`, opts)
     if (isOpen) {
       map.openInfoWindow(infoWindow, point)
     }
@@ -177,10 +179,10 @@ export const Result = () => {
     const points = []
     let totalDistance = 0
     const driving = new BMap.DrivingRoute(map)
-    const { lat: lat1, lng: lng1 } = route[0]
-    const { lat: lat2, lng: lng2 } = route[1]
-    let point1 = new BMap.Point(lng1, lat1)
-    let point2 = new BMap.Point(lng2, lat2)
+    let { lat: lat1, lng: lng1 } = route[0]
+    let { lat: lat2, lng: lng2 } = route[1]
+    let point1 = new BMap.Point(lng1 + 0.00658, lat1 + 0.00574)
+    let point2 = new BMap.Point(lng2 + 0.00658, lat2 + 0.00574)
     driving.search(point1, point2)
     function judge(driving) {
       return new Promise((resolve, reject) => {
@@ -211,8 +213,8 @@ export const Result = () => {
       route[i - 1].dis = res.dis
       const { lat: lat1, lng: lng1 } = route[i]
       const { lat: lat2, lng: lng2 } = route[i + 1]
-      let point1 = new BMap.Point(lng1, lat1)
-      let point2 = new BMap.Point(lng2, lat2)
+      let point1 = new BMap.Point(lng1 + 0.00658, lat1 + 0.00574)
+      let point2 = new BMap.Point(lng2 + 0.00658, lat2 + 0.00574)
       driving.search(point1, point2)
       i++
     }
