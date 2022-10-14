@@ -1,10 +1,10 @@
 import React from 'react'
-import { Input, Button, message, Modal, Table,Upload,Spin } from 'antd'
+import { Input, Button, message, Modal, Table, Upload, Spin } from 'antd'
 import { useEffect } from 'react'
 import { ImportOutlined, UserAddOutlined } from '@ant-design/icons'
 import { useHistory } from 'react-router'
 import { useState } from 'react'
-import { exportFile } from '../../../utils/exportFile' 
+import { exportFile } from '../../../utils/exportFile'
 import httpUtil from '../../../utils/httpUtil'
 import throttle from 'lodash/throttle'
 import { InboxOutlined } from '@ant-design/icons'
@@ -23,8 +23,6 @@ export const SelectHeader = (props) => {
   const [uploadVisible, setUploadVisible] = useState(false)
   const [loading, setLoading] = useState(false)
   const [fileList, setFileList] = useState([])
-
-
 
   const clientsColumns = [
     {
@@ -95,7 +93,7 @@ export const SelectHeader = (props) => {
       }
     })
   }
-  
+
   const changeShowClients = () => {}
 
   const submitClients = () => {
@@ -158,18 +156,24 @@ export const SelectHeader = (props) => {
       let formData = new FormData()
       formData.append('file', fileList[0].originFileObj)
       setLoading(true)
-      httpUtil.clientsFileUpload(formData).then((res) => {
-        setLoading(false)
-        if (res.status === 200) {
-          message.success('文件上传成功')
-          setUploadVisible(false)
-          setFileList([])
-          getClients()
-        } else {
-          message.error(res.msg)
+      httpUtil
+        .clientsFileUpload(formData)
+        .then((res) => {
           setLoading(false)
-        }
-      })
+          if (res.status === 200) {
+            message.success('文件上传成功')
+            setUploadVisible(false)
+            setFileList([])
+            getClients()
+          } else {
+            message.error(res.msg)
+            setLoading(false)
+          }
+        })
+        .catch((e) => {
+          setLoading(false)
+          message.error('文件格式错误')
+        })
     } else {
       message.error('请上传文件后再提交！')
     }
@@ -232,7 +236,7 @@ export const SelectHeader = (props) => {
         footer={[
           <Button
             type="primary"
-            style={{float:'left' }}
+            style={{ float: 'left' }}
             key="deleteall"
             onClick={changeShowClients}
           >
@@ -240,7 +244,7 @@ export const SelectHeader = (props) => {
           </Button>,
           <Button
             type="primary"
-            style={{ float:'left'}}
+            style={{ float: 'left' }}
             key="uploadClients"
             onClick={() => {
               setUploadVisible(true)

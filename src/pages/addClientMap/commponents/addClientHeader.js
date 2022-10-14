@@ -67,18 +67,24 @@ export const AddClientHeader = (props) => {
       let formData = new FormData()
       formData.append('file', fileList[0].originFileObj)
       setLoading(true)
-      httpUtil.clientsFileUpload(formData).then((res) => {
-        setLoading(false)
-        if (res.status === 200) {
-          message.success('文件上传成功') 
-          setUploadVisible(false)
-          setFileList([])
-          getNodes()
-        } else {
-          message.error(res.msg)
+      httpUtil
+        .clientsFileUpload(formData)
+        .then((res) => {
           setLoading(false)
-        }
-      })
+          if (res.status === 200) {
+            message.success('文件上传成功')
+            setUploadVisible(false)
+            setFileList([])
+            getNodes()
+          } else {
+            message.error(res.msg)
+            setLoading(false)
+          }
+        })
+        .catch((e) => {
+          setLoading(false)
+          message.error("文件格式错误")
+        })
     } else {
       message.error('请上传文件后再提交！')
     }
@@ -124,7 +130,7 @@ export const AddClientHeader = (props) => {
         //onOk={}
         onCancel={() => {
           if (loading) {
-            message.warn('文件正在上传，请稍后')
+            message.warn('文件正在上传，请稍等')
           } else setUploadVisible(false)
         }}
         title="文件上传"

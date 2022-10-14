@@ -6,8 +6,12 @@ import { InboxOutlined } from '@ant-design/icons'
 export const UploadResultModal = (props) => {
   const [fileList, setFileList] = useState([])
   const [loading, setLoading] = useState(false)
-  const { uploadResultVisible, setUploadResultVisible, uploadQuestionId ,getQuestions} =
-    props
+  const {
+    uploadResultVisible,
+    setUploadResultVisible,
+    uploadQuestionId,
+    getQuestions,
+  } = props
   const { Dragger } = Upload
   //上传的配置参数
   const uploadProps = {
@@ -43,18 +47,24 @@ export const UploadResultModal = (props) => {
       formData.append('questionId', uploadQuestionId)
       formData.append('file', fileList[0].originFileObj)
       setLoading(true)
-      httpUtil.uploadResultFile(formData).then((res) => {
-        setLoading(false)
-        if (res.status === 200) {
-          message.success('文件上传成功')
-          setUploadResultVisible(false)
-          getQuestions()
-          setFileList([])
-        } else {
-          message.error(res.msg)
+      httpUtil
+        .uploadResultFile(formData)
+        .then((res) => {
           setLoading(false)
-        }
-      })
+          if (res.status === 200) {
+            message.success('文件上传成功')
+            setUploadResultVisible(false)
+            getQuestions()
+            setFileList([])
+          } else {
+            message.error(res.msg)
+            setLoading(false)
+          }
+        })
+        .catch((e) => {
+          setLoading(false)
+          message.error('文件格式错误')
+        })
     } else {
       message.error('请上传文件后再提交！')
     }

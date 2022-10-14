@@ -34,7 +34,7 @@ export const ClientTableHeader = (props) => {
       }
     },
   }
-  
+
   //下载文件
   const downloadFile = () => {
     httpUtil.downloadNodesFile().then((res) => {
@@ -49,18 +49,24 @@ export const ClientTableHeader = (props) => {
       let formData = new FormData()
       formData.append('file', fileList[0].originFileObj)
       setLoading(true)
-      httpUtil.clientsFileUpload(formData).then((res) => {
-        setLoading(false)
-        if (res.status === 200) {
-          message.success('文件上传成功')
-          setUploadVisible(false)
-          setFileList([])
-          getClients()
-        } else {
-          message.error(res.msg)
+      httpUtil
+        .clientsFileUpload(formData)
+        .then((res) => {
           setLoading(false)
-        }
-      })
+          if (res.status === 200) {
+            message.success('文件上传成功')
+            setUploadVisible(false)
+            setFileList([])
+            getClients()
+          } else {
+            message.error(res.msg)
+            setLoading(false)
+          }
+        })
+        .catch((e) => {
+          setLoading(false)
+          message.error('文件格式错误')
+        })
     } else {
       message.error('请上传文件后再提交！')
     }

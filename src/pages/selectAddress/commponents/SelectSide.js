@@ -143,17 +143,23 @@ export const SelectSide = (props) => {
       formData.append('file', fileList[0].originFileObj)
       formData.append('questionId', questionId)
       setLoading(true)
-      httpUtil.carsFileUpload(formData).then((res) => {
-        setLoading(false)
-        if (res.status === 200) {
-          message.success('文件上传成功')
-          setUploadVisible(false)
-          setFileList([])
-          getAllCars()
-        } else {
-          message.error(res.msg)
-        }
-      })
+      httpUtil
+        .carsFileUpload(formData)
+        .then((res) => {
+          setLoading(false)
+          if (res.status === 200) {
+            message.success('文件上传成功')
+            setUploadVisible(false)
+            setFileList([])
+            getAllCars()
+          } else {
+            message.error(res.msg)
+          }
+        })
+        .catch((e) => {
+          setLoading(false)
+          message.error('文件格式错误')
+        })
     } else {
       message.error('请上传文件后再提交！')
     }

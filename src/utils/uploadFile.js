@@ -50,15 +50,6 @@ export const uploadFile = (method, url, data, resType) => {
               window.location.href = '/'
             }, 1000)
             break
-          case 404:
-            message.error(`未找到资源: ${errInfo}`)
-            break
-          case 500:
-            message.warning(`服务器未能处理`)
-            break
-          default:
-            message.error(`错误信息: ${errInfo}`)
-            break
         }
       }
     )
