@@ -385,7 +385,7 @@ export const SelectSide = (props) => {
             }}
           >
             <Button type="primary" htmlType="submit" block>
-              确认订单
+              确认信息
             </Button>
           </Form.Item>
         </Form>

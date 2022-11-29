@@ -94,7 +94,6 @@ export const SelectHeader = (props) => {
     })
   }
 
-  const changeShowClients = () => {}
 
   const submitClients = () => {
     const parmas = {
@@ -234,14 +233,6 @@ export const SelectHeader = (props) => {
           setClientAddVisible(false)
         }}
         footer={[
-          <Button
-            type="primary"
-            style={{ float: 'left' }}
-            key="deleteall"
-            onClick={changeShowClients}
-          >
-            显示所有
-          </Button>,
           <Button
             type="primary"
             style={{ float: 'left' }}
