@@ -34,7 +34,7 @@ export function Login() {
           </TabPane>
         </Tabs>
         <div className={styles['login-text']}>
-          Copyright &copy; {new Date().getFullYear()} MISLab 版权所有
+          Copyright &copy; {new Date().getFullYear()} 重庆邮电大学 版权所有
         </div>
       </div>
       <BG />

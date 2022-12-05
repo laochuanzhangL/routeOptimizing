@@ -55,7 +55,7 @@ export const Home = () => {
                 openUploadResult(questionId)
               }}
             >
-              <font color="#1890ff">导入结果</font>
+              <font color="#1890ff">导入方案</font>
             </span>
           </Space>
         )
@@ -63,7 +63,7 @@ export const Home = () => {
     },
 
     {
-      title: '查看结果',
+      title: '数据可视化',
       key: 'result',
       render: (e) => {
         const { questionId } = e

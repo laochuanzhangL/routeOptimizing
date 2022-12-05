@@ -13,38 +13,28 @@ export const AddClientHeader = (props) => {
   const [uploadVisible, setUploadVisible] = useState(false)
   const [fileList, setFileList] = useState([])
   const [loading, setLoading] = useState(false)
-  const { setCenter, getNodes,AMap,map } = props
+  const { setCenter, getNodes } = props
   const history = useHistory()
+  const BMapGL = window.BMapGL
   const { Search } = Input
   const { Dragger } = Upload
-    // 关键字搜索功能
-    const onSearch = (value) => {
-        if (value.trim() === '') return
-        const placeSearch = new AMap.PlaceSearch({
-        //city: "重庆", // 兴趣点城市
-        //citylimit: true, //是否强制限制在设置的城市内搜索
-        pageSize: 10, // 单页显示结果条数
-        children: 0, //不展示子节点数据
-        pageIndex: 1, //页码
-        extensions: 'base', //返回基本地址信息
-        })
-        //详情查询
-        placeSearch.search(value, function (status, result) {
-        if (status === 'complete' && result.info === 'OK') {
-            placeSearch_CallBack(result)
+  //改变地图中心位置
+  const onSearch = (e) => {
+    //不能携带cookie，故单独写请求
+    const myGeo = new BMapGL.Geocoder()
+    // 将地址解析结果显示在地图上，并调整地图视野
+    myGeo.getPoint(
+      e,
+      function (point) {
+        if (point) {
+          setCenter(point)
         } else {
-            message.error('查询地址失败', 1)
+          alert('您选择的地址没有解析到结果！')
         }
-        })
-        //回调函数
-        function placeSearch_CallBack(data) {
-        const poiArr = data.poiList.pois
-        const {location } = poiArr[0]
-        const { lng, lat} = location
-        map.setCenter([lng, lat])
-        map.setZoom(16,false,500)
-        }
-    }
+      },
+      '中国'
+    )
+  }
 
   const uploadProps = {
     fileList: fileList,

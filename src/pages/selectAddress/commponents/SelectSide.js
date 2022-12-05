@@ -17,7 +17,7 @@ import {
 } from 'antd'
 import httpUtil from '../../../utils/httpUtil'
 import { useHistory } from 'react-router'
-import { CheckOutlined, InboxOutlined } from '@ant-design/icons'
+import { CheckOutlined, InboxOutlined,ClockCircleOutlined } from '@ant-design/icons'
 const { Option } = Select
 export const SelectSide = (props) => {
   const { questionId, haveCenter } = props
@@ -239,14 +239,25 @@ export const SelectSide = (props) => {
         前往查看
       </Button>
     )
-    notification.open({
-      message: '计算成功',
-      description: '可点击以下按钮前往查看，提示4秒后自动消失',
-      btn,
-      key,
-      duration: 4,
-      icon: <CheckOutlined style={{ color: '#52c41a' }} />,
-    })
+    if(math!=2){
+      notification.open({
+        message: '计算成功',
+        description: '可点击以下按钮前往查看，提示4秒后自动消失',
+        btn,
+        key,
+        duration: 4,
+        icon: <CheckOutlined style={{ color: '#52c41a' }} />,
+      })
+    }else{
+      notification.open({
+        message: '正在计算距离矩阵',
+        // description: '可点击以下按钮前往查看，提示4秒后自动消失',
+        // btn,
+        key,
+        duration: 4,
+        icon: <ClockCircleOutlined style={{ color: '#52c41a' }} />,
+      })
+    }
   }
   const cancelMath = () => {
     setMathVisible(false)
@@ -385,7 +396,7 @@ export const SelectSide = (props) => {
             }}
           >
             <Button type="primary" htmlType="submit" block>
-              确认订单
+              确认信息
             </Button>
           </Form.Item>
         </Form>
