@@ -2,7 +2,33 @@ import marke_r from '../assets/mark_b.png'
 import mid from '../assets/mid.png'
 import car from '../assets/car.png'
 
-const colorList = ['#108ee9', '#f50', '#2db7f5', '#87d068']
+export const getRandomColor = (exist_color) => {
+  //以下的*192都是为了是获取到的颜色为深色的
+  let r = Math.floor(Math.random() * 192)
+  let g = Math.floor(Math.random() * 192)
+  let b = Math.floor(Math.random() * 192)
+  let r16 =
+    r.toString(16).length === 1 && r.toString(16) <= 'f'
+      ? 0 + r.toString(16)
+      : r.toString(16)
+  let g16 =
+    g.toString(16).length === 1 && g.toString(16) <= 'f'
+      ? 0 + g.toString(16)
+      : g.toString(16)
+  let b16 =
+    b.toString(16).length === 1 && b.toString(16) <= 'f'
+      ? 0 + b.toString(16)
+      : b.toString(16)
+  let color = '#' + r16 + g16 + b16
+  // 获取到未重复的颜色，返回该颜色
+  if (exist_color.indexOf(color) === -1) {
+    return color
+  }
+  // 获取到的颜色重复，重新生成
+  else {
+    getRandomColor(exist_color)
+  }
+}
 
 export const createLabelMarker = (AMap, coordinate, image) => {
   const labelMarker = new AMap.LabelMarker({
@@ -54,7 +80,7 @@ const createMarker = (AMap, map, path, image, x, y) => {
   })
 }
 
-const createPolyline = (AMap, path, colorNumber) => {
+const createPolyline = (AMap, path, color) => {
   return new AMap.Polyline({
     path,
     isOutline: true,
@@ -62,21 +88,19 @@ const createPolyline = (AMap, path, colorNumber) => {
     borderWeight: 1,
     strokeWeight: 6,
     showDir: true,
-    strokeOpacity: 0.9,
-    strokeColor: colorList[colorNumber],
+    strokeOpacity: 0.6,
+    strokeColor: color,
     lineJoin: 'round'
   })
 }
 
-export const startAnimation = (marker, lineArr) => {
+export const startAnimation = (marker, lineArr,speed) => {
   marker.moveAlong(lineArr, {
     // 每一段的时长
-    // speed:1200,
-    duration: 45, //可根据实际采集时间间隔设置
+    duration: speed, //可根据实际采集时间间隔设置
     // JSAPI2.0 是否延道路自动设置角度在 moveAlong 里设置
     autoRotation: true
   })
-  // marker.moveAlong(lineArr, 1200);
 }
 
 export const pauseAnimation = marker => {
@@ -91,7 +115,7 @@ export const stopAnimation = marker => {
   marker.stopMove()
 }
 
-export const generateRouteLine = (route, AMap, map, colorNumber) => {
+export const generateRouteLine = (route, AMap, map, color) => {
   const length = route.length
   // 构造路线导航类
   const driving = new AMap.Driving({
@@ -193,7 +217,7 @@ export const generateRouteLine = (route, AMap, map, colorNumber) => {
   }
   function drawRoute(route, index, address) {
     const path = parseRouteToPath(route)
-    const routeLine = createPolyline(AMap, path, colorNumber)
+    const routeLine = createPolyline(AMap, path, color)
     let marker, carMarker, lineArr
     lineArr = path.map(item => [item.lng, item.lat])
     if (index === 0) {

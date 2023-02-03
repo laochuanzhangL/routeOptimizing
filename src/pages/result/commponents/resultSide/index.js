@@ -48,7 +48,7 @@ export const ResultSide = (props) => {
             <Button
               size="small"
               type="link"
-              onClick={() => findText(vehicleId)}
+              onClick={() => findText(vehicleId,index)}
             >
               文本查看
             </Button>
@@ -57,11 +57,10 @@ export const ResultSide = (props) => {
               type="link"
               key="startTrackAnis"
               onClick={() => {
-                startTrackAnis(vehicleId)
                 //展示各点的动画1.清楚2.添加3.展示
                 deletePoint(map, 'marker', 'name', 'car')
                 map.add(carList[index].carMarker)
-                startAnimation(carList[index].carMarker, carList[index].lineArr)
+                startTrackAnis(vehicleId,index) 
               }}
             >
               {/* {isRunning ? '暂停动画' : '轨迹动画'} */}
@@ -115,7 +114,7 @@ export const ResultSide = (props) => {
           <span
             style={{ color: '#1890ff', cursor: 'pointer', display: 'block' }}
             onClick={() => {
-              onePointAnimation(index)
+              onePointAnimation(index,data.line)
             }}
           >
             {render.id === data.path.length - 1 ? '' : '单点动画'}
@@ -139,38 +138,55 @@ export const ResultSide = (props) => {
 
   const getCarDistance = () => {
     let tempCarDistance = {}
-    let sum = 0
-    trackAnis.map((item, index) => {
-      const { vehicleId, distance } = item
-      //
-      sum += distance
-      tempCarDistance[vehicleId] = sum
-    })
+    for(let i=0;i<trackAnis.length;i++){
+      let sum = 0
+      trackAnis[i].map((item) => {
+        const { vehicleId, distance } = item
+        sum += distance
+        tempCarDistance[vehicleId] = sum
+      })
+    }
     setCarDistance(tempCarDistance)
   }
 
   //开始对应的lushu动画
-  const startTrackAnis = (id) => {
+  const startTrackAnis = (id,index) => {
     let lineArr = []
     if (!routeLoading) {
-      trackAnis.map((item) => {
-        let { trackAni, vehicleId, carMarker } = item
-        if (vehicleId === id) {
-          lineArr.push(trackAni)
-          setCarMarker([...carMarkers, carMarker])
-        }
-      })
+      for(let i=0;i<trackAnis.length;i++){
+        trackAnis[i].map((item) => {
+          let { trackAni, vehicleId, carMarker } = item
+          if (vehicleId === id) {
+            lineArr.push(trackAni)
+          }
+        })
+      }
       lineArr = lineArr.flat()
       lineArr.pop()
-      setShowTrackAni(lineArr)
+      let speed=35
+      if(carDistance[id]){
+      if (carDistance[id] / 1000 > 1000) {
+        speed = (carDistance[id] / 1000) / 200
+      } else if (carDistance[id] / 1000 > 500) {
+        speed = (carDistance[id] / 1000) / 67
+      } else if (carDistance[id] / 1000 > 200) {
+        speed = (carDistance[id] / 1000) / 17
+      } else if (carDistance[id] / 1000 > 100) {
+        speed = (carDistance[id] / 1000) / 7
+      } else if (carDistance[id] / 1000 > 50) {
+        speed = (carDistance[id] / 1000) / 2.6
+      } else {
+        speed = (carDistance[id] / 1000) / 0.7
+        speed = speed < 35 ? 35 : speed}
+      }
+      startAnimation(carList[index].carMarker, lineArr,speed)
     } else {
       message.warn('请等待路线绘制完成')
     }
   }
 
   //找到对应要打开的车辆信息
-  const findText = (id) => {
-    // console.log('carRoutes=', trackAnis);
+  const findText = (id,dex) => {
     carRoutes.map((item, index) => {
       const { vehicleId } = item.vehicle
       if (vehicleId == id) {
@@ -180,7 +196,7 @@ export const ResultSide = (props) => {
         const len = route.length
         for (let i = 0; i < len; i++) {
           const { nodeName, nodeAddress, lat, lng } = route[i]
-          const { distance } = trackAnis[i] //distance,自己传递
+          const { distance } = trackAnis[index][i] //distance,自己传递
           path.push({ nodeName, nodeAddress, id: i, dis: distance, lat, lng })
         }
         const data = {
@@ -189,8 +205,8 @@ export const ResultSide = (props) => {
           path,
           distance: carDistance[vehicleId],
           vehicleId,
+          line:dex
         }
-        // console.log('data=', data)
         setData(data)
       }
     })
@@ -207,11 +223,11 @@ export const ResultSide = (props) => {
     })
   }
   // 单点动画
-  const onePointAnimation = async (index) => {
+  const onePointAnimation = async (index,line) => {
     setTextVisible(false)
     deletePoint(map, 'marker', 'name', 'car')
-    map.add(trackAnis[index].carMarker)
-    trackAnis[index].start()
+    map.add(trackAnis[line][index].carMarker)
+    trackAnis[line][index].start()
   }
   //打开文本轨迹
   const openText = () => {

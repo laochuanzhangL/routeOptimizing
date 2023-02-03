@@ -6,7 +6,7 @@ import httpUtil from '../../utils/httpUtil'
 import car from '../../assets/car.png'
 import { useParams } from 'react-router-dom'
 import './styles.less'
-import { generateRouteLine, startAnimation } from '../../utils/AMap'
+import { generateRouteLine, startAnimation,getRandomColor } from '../../utils/AMap'
 import AMapLoader from '@amap/amap-jsapi-loader'
 
 export const Result = () => {
@@ -27,6 +27,7 @@ export const Result = () => {
   const [carRoutes, setcarRoutes] = useState([])
   const [cars, setCars] = useState([])
   const [carList, setCarList] = useState([])
+  const [colors, setColors] = useState([])
 
   // 获取全部车辆，点，路径
   useEffect(() => {
@@ -53,7 +54,7 @@ export const Result = () => {
 
   useEffect(() => {
     openNotification()
-    drawPathes(0)
+    drawPathes()
   }, [map, AMap])
 
   //根据路线动画的数量来判断是否绘制完成
@@ -137,7 +138,7 @@ export const Result = () => {
   //判断路线绘制是否完成
   const judgeLoading = () => {
     if (carRoutes.length) {
-      if (trackAnis.length == carRoutes[0].route.length) {
+      if (trackAnis.length == carRoutes.length) {
         message.success('路线绘制成功')
         setRouteLoading(false)
         notification.close('drawRoute')
@@ -164,33 +165,35 @@ export const Result = () => {
     })
   }
   // 绘制路线
-  const drawPathes = async (value) => {
+  const drawPathes = async () => {
     setTrackAnis([])
+    setColors([])
     const path = []
-    const { route, vehicle } = carRoutes[0]
+    for (let i = 0; i < carRoutes.length; i++) {
+    let line=[]
+    const { route, vehicle } = carRoutes[i]
     const { vehicleId } = vehicle
-    let result = await generateRouteLine(route, AMap, map, value)
+    const color = getRandomColor(colors)
+    setColors([...colors, color])
+    let result = await generateRouteLine(route, AMap, map, color)
+    
 
     let carMarker = result[0].carMarker
     let lineArr = []
     result.map((item) => lineArr.push(item.lineArr))
     lineArr = lineArr.flat()
     lineArr.pop()
-    setCarList([
-      ...carList,
-      {
-        carMarker: carMarker,
-        lineArr: lineArr,
-        start: () => startAnimation(carMarker, lineArr),
-      },
-    ])
-    result.forEach((item, index) => {
+    carList.push({
+      carMarker: carMarker,
+      lineArr: lineArr,
+      start: () => startAnimation(carMarker, lineArr,36),
+    })
+    result.map((item, index) => {
       let carMarker
       if (index < result.length - 1) {
         carMarker = new AMap.Marker({
           position: item.lineArr[0],
           icon: car,
-          // map,
           offset: new AMap.Pixel(-13, -26),
           extData: {
             name: 'car',
@@ -198,22 +201,35 @@ export const Result = () => {
         })
           //段落动画视野跟随
         carMarker.on('moving', function (e) {
-          //passedPolyline.setPath(e.passedPath);
             map.setCenter(e.target.getPosition(),true)
         });
       }
-      path.push({
+      let speed=35
+      if (item.distance / 1000 > 1000) {
+        speed = (item.distance / 1000) / 200
+      } else if (item.distance / 1000 > 500) {
+        speed = (item.distance / 1000) / 67
+      } else if (item.distance / 1000 > 200) {
+        speed = (item.distance / 1000) / 17
+      } else if (item.distance / 1000 > 100) {
+        speed = (item.distance / 1000) / 7
+      } else if (item.distance / 1000 > 50) {
+        speed = (item.distance / 1000) / 2.6
+      } else {
+        speed = (item.distance / 1000) / 0.7
+        speed = speed < 35 ? 35 : speed}
+      line.push({
         carMarker: carMarker,
         trackAni: item.lineArr, //两点的动画对象数组
         vehicleId,
         distance: item.distance, //两点距离
         isRunning: false,
-        start: () => startAnimation(carMarker, item.lineArr), //每个点的车标记
+        start: () => startAnimation(carMarker, item.lineArr,speed), //每个点的车标记
       })
     })
-    setTrackAnis(path)
-    map.on('zoomstart',changeSpeedStart)
-    map.on('zoomchange',changeSpeed)
+    path.push(line)
+  }
+  setTrackAnis(path)
   }
   // 开始滚动
   const changeSpeedStart= () => {
