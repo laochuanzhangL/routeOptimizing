@@ -29,6 +29,7 @@ export const AddClientMap = () => {
 
   useEffect(() => {
     getBeginCenter()
+    console.log(123)
   }, [nodes])
   const getNodes = () => {
     httpUtil.getAllClients().then((res) => {
@@ -51,7 +52,6 @@ export const AddClientMap = () => {
 
   const openAddClientModal = () => {
     if (addingClient) {
-      console.log(123)
       setClientAddVisible(true)
     }
   }
