@@ -8,7 +8,7 @@ import redMark from '../../assets/redMark.png'
 import blueMark from '../../assets/blueMark.png'
 import { useParams } from 'react-router-dom'
 import './styles.less'
-export const Result = () => {
+export const Result2 = () => {
   const routeParams = useParams()
   const { finalSolutionId, questionId } = routeParams
   const [sideVisible, setSideVisible] = useState(true)

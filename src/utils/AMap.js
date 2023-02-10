@@ -1,6 +1,6 @@
 import marke_r from '../assets/mark_b.png'
 import mid from '../assets/mid.png'
-import car from '../assets/car.png'
+import car from '../assets/newcar.png'
 
 export const getRandomColor = (exist_color) => {
   //以下的*192都是为了是获取到的颜色为深色的

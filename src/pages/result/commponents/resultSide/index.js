@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Drawer, Button, Table, message, Modal, Spin } from 'antd'
 import { RightOutlined, DownloadOutlined } from '@ant-design/icons'
-import car from '../../../../assets/car.png'
+import car from '../../../../assets/newcar.png'
 import './styles.less'
 import httpUtil from '../../../../utils/httpUtil'
 import { exportFile } from '../../../../utils/exportFile'
