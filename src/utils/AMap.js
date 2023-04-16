@@ -1,6 +1,6 @@
 import marke_r from '../assets/mark_b.png'
 import mid from '../assets/mid.png'
-import car from '../assets/newcar.png'
+import car from '../assets/car.png'
 
 export const getRandomColor = (exist_color) => {
   //以下的*192都是为了是获取到的颜色为深色的
@@ -99,7 +99,7 @@ export const startAnimation = (marker, lineArr,speed) => {
     // 每一段的时长
     duration: speed, //可根据实际采集时间间隔设置
     // JSAPI2.0 是否延道路自动设置角度在 moveAlong 里设置
-    autoRotation: true
+    autoRotation: false
   })
 }
 
@@ -122,7 +122,7 @@ export const generateRouteLine = (route, AMap, map, color) => {
     policy: AMap.DrivingPolicy.LEAST_TIME
   })
   let carMarkerAndLineArr
-
+  let i=0
   return Promise.all(
     route.map((item, index) => {
       return new Promise((resolve, reject) => {
@@ -132,43 +132,48 @@ export const generateRouteLine = (route, AMap, map, color) => {
             time: 0
           })
         }
-        driving.search(
-          new AMap.LngLat(route[index]['lng'], route[index]['lat']),
-          new AMap.LngLat(
-            route[index + 1]['lng'],
-            route[index + 1]['lat']
-          ),
-          (status, result) => {
-            if (status === 'complete') {
-              if (result.routes && result.routes.length) {
-                carMarkerAndLineArr = drawRoute(
-                  result.routes[0],
-                  index,
-                  route[index].nodeName
-                )
+        
+        setTimeout(
+        () => {
+          driving.search(
+            new AMap.LngLat(route[index]['lng'], route[index]['lat']),
+            new AMap.LngLat(
+              route[index + 1]['lng'],
+              route[index + 1]['lat']
+            ),
+            (status, result) => {
+              if (status === 'complete') {
+                if (result.routes && result.routes.length) {
+                  carMarkerAndLineArr = drawRoute(
+                    result.routes[0],
+                    index,
+                    route[index].nodeName
+                  )
+                }
+              }
+              if (index === 0) {
+                //段落动画视野跟随
+                carMarkerAndLineArr.carMarker.on('moving', function (e) {
+                  //passedPolyline.setPath(e.passedPath);
+                  map.setCenter(e.target.getPosition(),true)
+                });
+                resolve({
+                  distance: result.routes[0].distance,
+                  time: result.routes[0].time,
+                  carMarker: carMarkerAndLineArr.carMarker,
+                  lineArr: carMarkerAndLineArr.lineArr
+                })
+              } else {
+                resolve({
+                  distance: result.routes[0].distance,
+                  time: result.routes[0].time,
+                  lineArr: carMarkerAndLineArr.lineArr
+                })
               }
             }
-            if (index === 0) {
-              //段落动画视野跟随
-              carMarkerAndLineArr.carMarker.on('moving', function (e) {
-                //passedPolyline.setPath(e.passedPath);
-                map.setCenter(e.target.getPosition(),true)
-              });
-              resolve({
-                distance: result.routes[0].distance,
-                time: result.routes[0].time,
-                carMarker: carMarkerAndLineArr.carMarker,
-                lineArr: carMarkerAndLineArr.lineArr
-              })
-            } else {
-              resolve({
-                distance: result.routes[0].distance,
-                time: result.routes[0].time,
-                lineArr: carMarkerAndLineArr.lineArr
-              })
-            }
-          }
-        )
+          ) 
+        }
+        ,50*index)
       })
     })
   )

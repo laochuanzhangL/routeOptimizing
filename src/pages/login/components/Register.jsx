@@ -38,7 +38,7 @@ export const Register = () => {
     }
     httpUtil.getEmailCode(eamil).then((res) => {
       console.log(res)
-      if (res.status == 0) {
+      if (res.status == 9999) {
         message.success('验证码发送成功')
       } else {
         message.warning('验证码发送失败')

@@ -215,13 +215,15 @@ export const SelectSide = (props) => {
   const startExecute = () => {
     const query = { questionId, key: math }
     httpUtil.executeAlgorithm(query).then((res) => {
-      console.log(res.status)
+      console.log(res)
       if (res.status === 0) {
         openNotification(res.data)
         setMathVisible(false)
       } else {
-        message.error('数据有误')
+        message.error(res.message)
       }
+    },(rej)=>{
+      console.log(rej.code==500)
     })
   }
   //算法计算完成后的通知
