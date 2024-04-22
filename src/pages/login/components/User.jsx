@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useHistory } from 'react-router'
-import { Form, Input, Button, Checkbox, Skeleton, message } from 'antd'
+import { Form, Input, Button, Space, Radio, Skeleton, message } from 'antd'
 import {
   UserOutlined,
   LockOutlined,
@@ -22,9 +22,11 @@ export const User = () => {
     }
     httpUtil.login(data).then((res) => {
       if (res.status == 9999) {
-        const { userId } = res.data
-        sessionStorage.setItem('userId', userId);
-        history.push('/user')
+        const { userId, role } = res.data
+        message.success(res.msg)
+        sessionStorage.setItem('userId', userId)
+        if (role == 0) history.push('/user')
+        else if (role == 1) history.push('/manage')
       } else {
         message.warn(res.msg)
       }
@@ -50,6 +52,7 @@ export const User = () => {
       className="login-form"
       initialValues={{
         remember: true,
+        role: 0,
       }}
       onFinish={onFinish}
     >
@@ -83,7 +86,6 @@ export const User = () => {
           placeholder="密码"
         />
       </Form.Item>
-
       <div
         style={{
           position: 'relative',
@@ -134,7 +136,14 @@ export const User = () => {
           />
         )}
       </div>
-
+      <Form.Item name={'role'} noStyle>
+        <Radio.Group>
+          <Space>
+            <Radio value={0}>用户登陆</Radio>
+            <Radio value={1}>管理员登陆</Radio>
+          </Space>
+        </Radio.Group>
+      </Form.Item>
       <Form.Item>
         <Button
           type="primary"
@@ -143,12 +152,6 @@ export const User = () => {
         >
           登陆
         </Button>
-      </Form.Item>
-
-      <Form.Item>
-        <Form.Item valuePropName="checked" noStyle>
-          <Checkbox>记住密码</Checkbox>
-        </Form.Item>
       </Form.Item>
     </Form>
   )

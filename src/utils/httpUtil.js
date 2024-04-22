@@ -140,6 +140,13 @@ class HttpUtil {
   //批量删除客户
   deleteClients = (parmas) =>
     httpReq('delete', '/node/batch', parmas.nodeIdList)
+
+  //管理员操作
+  manageOperate=(parmas)=>
+    httpReq('post',`/userSystem/manage/operation?operationType=${parmas.operationType}`,parmas.userMessage)
+
+  
+    
 }
 
 export default new HttpUtil()

@@ -176,8 +176,6 @@ export const Result = () => {
     const color = getRandomColor(colors)
     setColors([...colors, color])
     let result = await generateRouteLine(route, AMap, map, color)
-    
-
     let carMarker = result[0].carMarker
     let lineArr = []
     result.map((item) => lineArr.push(item.lineArr))

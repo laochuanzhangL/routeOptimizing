@@ -37,7 +37,6 @@ export const Register = () => {
       message.warning('请先输入邮箱号')
     }
     httpUtil.getEmailCode(eamil).then((res) => {
-      console.log(res)
       if (res.status == 0) {
         message.success('验证码发送成功')
       } else {

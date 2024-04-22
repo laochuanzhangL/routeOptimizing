@@ -42,25 +42,25 @@ export const createLabelMarker = (AMap, coordinate, image) => {
       size: [20, 30],
       anchor: 'bottom-center',
       angel: 0,
-      retina: true
+      retina: true,
     },
-    offset: new AMap.Pixel(-10, -30)
+    offset: new AMap.Pixel(-10, -30),
   })
   return labelMarker
 }
 
-export const createLabelsLayer = AMap => {
+export const createLabelsLayer = (AMap) => {
   // 创建一个 LabelsLayer 实例来承载 LabelMarker
   const labelsLayer = new AMap.LabelsLayer({
     zooms: [3, 20],
     zIndex: 111,
     animation: false,
-    collision: false
+    collision: false,
   })
   return labelsLayer
 }
 
-export const parseRouteToPath = route => {
+export const parseRouteToPath = (route) => {
   const path = []
   for (let i = 0, l = route.steps.length; i < l; i++) {
     const step = route.steps[i]
@@ -76,7 +76,7 @@ const createMarker = (AMap, map, path, image, x, y) => {
     position: path,
     icon: image,
     map,
-    offset: new AMap.Pixel(x, y)
+    offset: new AMap.Pixel(x, y),
   })
 }
 
@@ -90,28 +90,28 @@ const createPolyline = (AMap, path, color) => {
     showDir: true,
     strokeOpacity: 0.6,
     strokeColor: color,
-    lineJoin: 'round'
+    lineJoin: 'round',
   })
 }
 
-export const startAnimation = (marker, lineArr,speed) => {
+export const startAnimation = (marker, lineArr, speed) => {
   marker.moveAlong(lineArr, {
     // 每一段的时长
     duration: speed, //可根据实际采集时间间隔设置
     // JSAPI2.0 是否延道路自动设置角度在 moveAlong 里设置
-    autoRotation: true
+    autoRotation: true,
   })
 }
 
-export const pauseAnimation = marker => {
+export const pauseAnimation = (marker) => {
   marker.pauseMove()
 }
 
-export const resumeAnimation = marker => {
+export const resumeAnimation = (marker) => {
   marker.resumeMove()
 }
 
-export const stopAnimation = marker => {
+export const stopAnimation = (marker) => {
   marker.stopMove()
 }
 
@@ -119,7 +119,7 @@ export const generateRouteLine = (route, AMap, map, color) => {
   const length = route.length
   // 构造路线导航类
   const driving = new AMap.Driving({
-    policy: AMap.DrivingPolicy.LEAST_TIME
+    policy: AMap.DrivingPolicy.LEAST_TIME,
   })
   let carMarkerAndLineArr
 
@@ -129,16 +129,14 @@ export const generateRouteLine = (route, AMap, map, color) => {
         if (index === length - 1) {
           resolve({
             distance: 0,
-            time: 0
+            time: 0,
           })
         }
         driving.search(
           new AMap.LngLat(route[index]['lng'], route[index]['lat']),
-          new AMap.LngLat(
-            route[index + 1]['lng'],
-            route[index + 1]['lat']
-          ),
+          new AMap.LngLat(route[index + 1]['lng'], route[index + 1]['lat']),
           (status, result) => {
+            if (status === 'error') console.log(status, result)
             if (status === 'complete') {
               if (result.routes && result.routes.length) {
                 carMarkerAndLineArr = drawRoute(
@@ -152,19 +150,19 @@ export const generateRouteLine = (route, AMap, map, color) => {
               //段落动画视野跟随
               carMarkerAndLineArr.carMarker.on('moving', function (e) {
                 //passedPolyline.setPath(e.passedPath);
-                map.setCenter(e.target.getPosition(),true)
-              });
+                map.setCenter(e.target.getPosition(), true)
+              })
               resolve({
                 distance: result.routes[0].distance,
                 time: result.routes[0].time,
                 carMarker: carMarkerAndLineArr.carMarker,
-                lineArr: carMarkerAndLineArr.lineArr
+                lineArr: carMarkerAndLineArr.lineArr,
               })
             } else {
               resolve({
                 distance: result.routes[0].distance,
                 time: result.routes[0].time,
-                lineArr: carMarkerAndLineArr.lineArr
+                lineArr: carMarkerAndLineArr.lineArr,
               })
             }
           }
@@ -173,97 +171,96 @@ export const generateRouteLine = (route, AMap, map, color) => {
     })
   )
   // 创建信息窗体
-  function createInfoWindow(title, content){
-    let info = document.createElement("div");
-    info.className = "custom-info input-card content-window-card";
+  function createInfoWindow(title, content) {
+    let info = document.createElement('div')
+    info.className = 'custom-info input-card content-window-card'
 
     //可以通过下面的方式修改自定义窗体的宽高
-    info.style.width = "240px";
+    info.style.width = '240px'
     // 定义顶部标题
-    let top = document.createElement("div");
-    let titleD = document.createElement("div");
-    let closeX = document.createElement("img");
-    top.className = "info-top";
-    titleD.innerHTML = title;
-    closeX.src = "https://webapi.amap.com/images/close2.gif";
-    closeX.onclick = closeInfoWindow;
+    let top = document.createElement('div')
+    let titleD = document.createElement('div')
+    let closeX = document.createElement('img')
+    top.className = 'info-top'
+    titleD.innerHTML = title
+    closeX.src = 'https://webapi.amap.com/images/close2.gif'
+    closeX.onclick = closeInfoWindow
 
-    top.appendChild(titleD);
-    top.appendChild(closeX);
-    info.appendChild(top);
+    top.appendChild(titleD)
+    top.appendChild(closeX)
+    info.appendChild(top)
 
     // 定义中部内容
-    let middle = document.createElement("div");
-    middle.className = "info-middle";
-    middle.style.backgroundColor = 'white';
-    middle.innerHTML = content;
-    info.appendChild(middle);
+    let middle = document.createElement('div')
+    middle.className = 'info-middle'
+    middle.style.backgroundColor = 'white'
+    middle.innerHTML = content
+    info.appendChild(middle)
 
     // 定义底部内容
-    let bottom = document.createElement("div");
-    bottom.className = "info-bottom";
-    bottom.style.position = 'relative';
-    bottom.style.top = '0px';
-    bottom.style.margin = '0 auto';
-    let sharp = document.createElement("img");
-    sharp.src = "https://webapi.amap.com/images/sharp.png";
-    bottom.appendChild(sharp);
-    info.appendChild(bottom);
-    return info;
-}
- //关闭信息窗体
+    let bottom = document.createElement('div')
+    bottom.className = 'info-bottom'
+    bottom.style.position = 'relative'
+    bottom.style.top = '0px'
+    bottom.style.margin = '0 auto'
+    let sharp = document.createElement('img')
+    sharp.src = 'https://webapi.amap.com/images/sharp.png'
+    bottom.appendChild(sharp)
+    info.appendChild(bottom)
+    return info
+  }
+  //关闭信息窗体
   function closeInfoWindow() {
-    map.clearInfoWindow();
+    map.clearInfoWindow()
   }
   function drawRoute(route, index, address) {
     const path = parseRouteToPath(route)
     const routeLine = createPolyline(AMap, path, color)
     let marker, carMarker, lineArr
-    lineArr = path.map(item => [item.lng, item.lat])
+    lineArr = path.map((item) => [item.lng, item.lat])
     if (index === 0) {
       marker = createMarker(AMap, map, path[0], marke_r, -10, -31)
-      carMarker 
-      =new AMap.Marker({
+      carMarker = new AMap.Marker({
         position: path[0],
         icon: car,
         offset: new AMap.Pixel(-13, -26),
-        extData:{
-          name:"car"
-        }
+        extData: {
+          name: 'car',
+        },
       })
-      marker.on('mouseover',(e) => {
+      marker.on('mouseover', (e) => {
         //实例化信息窗体
-         let title = '<span style="font-size:20px;">站点</span>',
-         content = [];
-         content.push(address);
-         let infoWindow = new AMap.InfoWindow({
-         isCustom: true,  //使用自定义窗体
-         content: createInfoWindow(title, content.join("<br/>")),
-         offset: new AMap.Pixel(16, -45)
-         });
-        infoWindow.open(map, marker.getPosition());
+        let title = '<span style="font-size:20px;">站点</span>',
+          content = []
+        content.push(address)
+        let infoWindow = new AMap.InfoWindow({
+          isCustom: true, //使用自定义窗体
+          content: createInfoWindow(title, content.join('<br/>')),
+          offset: new AMap.Pixel(16, -45),
+        })
+        infoWindow.open(map, marker.getPosition())
       })
-      marker.on('mouseout', function(){
-        map.clearInfoWindow();
-      });
+      marker.on('mouseout', function () {
+        map.clearInfoWindow()
+      })
       map.add(routeLine)
     } else {
       let marker = createMarker(AMap, map, path[0], mid, -13, -26)
-      marker.on('mouseover',(e) => {
+      marker.on('mouseover', (e) => {
         //实例化信息窗体
-         let title = '<span style="font-size:20px;">站点</span>',
-         content = [];
-         content.push(address);
-         let infoWindow = new AMap.InfoWindow({
-         isCustom: true,  //使用自定义窗体
-         content: createInfoWindow(title, content.join("<br/>")),
-         offset: new AMap.Pixel(16, -45)
-         });
-        infoWindow.open(map, marker.getPosition());
+        let title = '<span style="font-size:20px;">站点</span>',
+          content = []
+        content.push(address)
+        let infoWindow = new AMap.InfoWindow({
+          isCustom: true, //使用自定义窗体
+          content: createInfoWindow(title, content.join('<br/>')),
+          offset: new AMap.Pixel(16, -45),
+        })
+        infoWindow.open(map, marker.getPosition())
       })
-      marker.on('mouseout', function(){
-        map.clearInfoWindow();
-      });
+      marker.on('mouseout', function () {
+        map.clearInfoWindow()
+      })
       map.add(routeLine)
     }
     return { carMarker, lineArr }

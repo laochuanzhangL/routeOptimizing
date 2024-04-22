@@ -1,4 +1,4 @@
-import { Login, UserHome,AddClientMap } from '../pages/index'
+import { Login, UserHome, AddClientMap, Manage } from '../pages/index'
 import { NotFound } from '../commponents'
 import { Result } from '../pages/result'
 import { SelectAddress } from '../pages/selectAddress'
@@ -6,6 +6,10 @@ const Routes = [
   {
     path: '/user',
     component: UserHome,
+  },
+  {
+    path: '/manage',
+    component: Manage,
   },
   {
     path: '/selectaddress/:questionId',
