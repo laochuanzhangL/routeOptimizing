@@ -122,7 +122,7 @@ export const generateRouteLine = (route, AMap, map, color) => {
     policy: AMap.DrivingPolicy.LEAST_TIME,
   })
   let carMarkerAndLineArr
-
+  let i = 0
   return Promise.all(
     route.map((item, index) => {
       return new Promise((resolve, reject) => {
@@ -167,6 +167,43 @@ export const generateRouteLine = (route, AMap, map, color) => {
             }
           }
         )
+
+        setTimeout(() => {
+          driving.search(
+            new AMap.LngLat(route[index]['lng'], route[index]['lat']),
+            new AMap.LngLat(route[index + 1]['lng'], route[index + 1]['lat']),
+            (status, result) => {
+              if (status === 'complete') {
+                if (result.routes && result.routes.length) {
+                  carMarkerAndLineArr = drawRoute(
+                    result.routes[0],
+                    index,
+                    route[index].nodeName
+                  )
+                }
+              }
+              if (index === 0) {
+                //段落动画视野跟随
+                carMarkerAndLineArr.carMarker.on('moving', function (e) {
+                  //passedPolyline.setPath(e.passedPath);
+                  map.setCenter(e.target.getPosition(), true)
+                })
+                resolve({
+                  distance: result.routes[0].distance,
+                  time: result.routes[0].time,
+                  carMarker: carMarkerAndLineArr.carMarker,
+                  lineArr: carMarkerAndLineArr.lineArr,
+                })
+              } else {
+                resolve({
+                  distance: result.routes[0].distance,
+                  time: result.routes[0].time,
+                  lineArr: carMarkerAndLineArr.lineArr,
+                })
+              }
+            }
+          )
+        }, 50 * index)
       })
     })
   )

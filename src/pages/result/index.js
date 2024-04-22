@@ -192,7 +192,7 @@ export const Result = () => {
         carMarker = new AMap.Marker({
           position: item.lineArr[0],
           icon: car,
-          offset: new AMap.Pixel(-13, -26),
+          offset: new AMap.Pixel(-13, -10),
           extData: {
             name: 'car',
           },

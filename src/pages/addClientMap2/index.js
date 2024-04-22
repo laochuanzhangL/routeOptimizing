@@ -12,7 +12,7 @@ import './styles.less'
 import { useParams } from 'react-router-dom'
 import httpUtil from '../../utils/httpUtil'
 import md5 from 'js-md5'
-export const AddClientMap = () => {
+export const AddClientMap2 = () => {
   const [center, setCenter] = useState({ lng: 116.402544, lat: 39.928216 })
   const [addingClient, setAddingClient] = useState()
   const [clientAddVisible, setClientAddVisible] = useState(false)

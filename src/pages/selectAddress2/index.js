@@ -6,7 +6,7 @@ import { SelectHeader, SelectNodes, SelectSide } from './commponents/index'
 import './styles.less'
 import { useParams } from 'react-router-dom'
 import httpUtil from '../../utils/httpUtil'
-export const SelectAddress = () => {
+export const SelectAddress2 = () => {
   const routeParams = useParams()
   const { questionId } = routeParams
   const [center, setCenter] = useState({ lng: 116.402544, lat: 39.928216 })

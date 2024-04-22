@@ -1,7 +1,7 @@
 * {
   margin: 0;
   padding: 0;
-  .userHome {
+  .manage {
     width: 100%;
     height: 100%;
     max-width: 2000px;
@@ -10,10 +10,23 @@
     display: flex;
     min-width: 1117px;
     flex-direction: column;
-    .home_content {
+    .manage_content {
       width: 100%;
       flex-grow: 1;
       background-color: #fcfcfc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      .content {
+        margin-top: 30px;
+        width: 75%;
+        min-width: 1000px;
+        height: 93%;
+        .btn_wrap {
+          display: flex;
+          justify-content: space-around;
+        }
+      }
     }
   }
 }

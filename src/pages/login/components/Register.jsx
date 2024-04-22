@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react'
 import { Form, Input, Button, message } from 'antd'
-import { useHistory } from 'react-router'
 import {
   UserOutlined,
   LockOutlined,
@@ -37,7 +36,7 @@ export const Register = () => {
       message.warning('请先输入邮箱号')
     }
     httpUtil.getEmailCode(eamil).then((res) => {
-      if (res.status == 0) {
+      if (res.status == 9999) {
         message.success('验证码发送成功')
       } else {
         message.warning('验证码发送失败')
