@@ -196,7 +196,7 @@ export const ResultSide = (props) => {
         const len = route.length
         for (let i = 0; i < len; i++) {
           const { nodeName, nodeAddress, lat, lng } = route[i]
-          const { distance } = trackAnis[index][i] //distance,自己传递
+          const { distance = 0 } = trackAnis[index] && trackAnis[index][i] ? trackAnis[index][i] : {};//distance,自己传递,默认为0
           path.push({ nodeName, nodeAddress, id: i, dis: distance, lat, lng })
         }
         const data = {

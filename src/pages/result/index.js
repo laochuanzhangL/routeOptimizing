@@ -166,29 +166,35 @@ export const Result = () => {
   }
   // 绘制路线
   const drawPathes = async () => {
-    setTrackAnis([])
-    setColors([])
-    const path = []
-    for (let i = 0; i < carRoutes.length; i++) {
-    let line=[]
-    const { route, vehicle } = carRoutes[i]
-    const { vehicleId } = vehicle
-    const color = getRandomColor(colors)
-    setColors([...colors, color])
-    let result = await generateRouteLine(route, AMap, map, color)
-    let carMarker = result[0].carMarker
-    let lineArr = []
-    result.map((item) => lineArr.push(item.lineArr))
-    lineArr = lineArr.flat()
-    lineArr.pop()
+  setTrackAnis([]);
+  setColors([]);
+  const path = [];
+
+  for (let i = 0; i < carRoutes.length; i++) {
+    const { route, vehicle } = carRoutes[i];
+    const { vehicleId } = vehicle;
+    const color = getRandomColor(colors);
+    setColors([...colors, color]);
+
+    // 获取路径并等待返回
+    const result = await generateRouteLine(route, AMap, map, color);
+
+    let carMarker = result[0].carMarker;
+    let lineArr = [];
+    result.forEach(item => lineArr.push(item.lineArr));
+    lineArr = lineArr.flat();
+    lineArr.pop(); // 去掉最后一个点，避免重复
+
     carList.push({
       carMarker: carMarker,
       lineArr: lineArr,
-      start: () => startAnimation(carMarker, lineArr,36),
-    })
-    result.map((item, index) => {
-      let carMarker
-      if (index < result.length - 1) {
+      start: () => startAnimation(carMarker, lineArr, 36),
+    });
+
+    const line = [];
+    result.forEach((item, index) => {
+      let carMarker;
+      if (index < result.length ) {
         carMarker = new AMap.Marker({
           position: item.lineArr[0],
           icon: car,
@@ -196,39 +202,44 @@ export const Result = () => {
           extData: {
             name: 'car',
           },
-        })
-          //段落动画视野跟随
-        carMarker.on('moving', function (e) {
-            map.setCenter(e.target.getPosition(),true)
+        });
+
+        // 段落动画视野跟随
+        carMarker.on('moving', (e) => {
+          map.setCenter(e.target.getPosition(), true);
+        });
+
+        // 根据距离动态调整速度
+        let speed = calculateSpeed(item.distance);
+        line.push({
+          carMarker: carMarker,
+          trackAni: item.lineArr,
+          vehicleId,
+          distance: item.distance,
+          isRunning: false,
+          start: () => startAnimation(carMarker, item.lineArr, speed),
         });
       }
-      let speed=35
-      if (item.distance / 1000 > 1000) {
-        speed = (item.distance / 1000) / 200
-      } else if (item.distance / 1000 > 500) {
-        speed = (item.distance / 1000) / 67
-      } else if (item.distance / 1000 > 200) {
-        speed = (item.distance / 1000) / 17
-      } else if (item.distance / 1000 > 100) {
-        speed = (item.distance / 1000) / 7
-      } else if (item.distance / 1000 > 50) {
-        speed = (item.distance / 1000) / 2.6
-      } else {
-        speed = (item.distance / 1000) / 0.7
-        speed = speed < 35 ? 35 : speed}
-      line.push({
-        carMarker: carMarker,
-        trackAni: item.lineArr, //两点的动画对象数组
-        vehicleId,
-        distance: item.distance, //两点距离
-        isRunning: false,
-        start: () => startAnimation(carMarker, item.lineArr,speed), //每个点的车标记
-      })
-    })
-    path.push(line)
+    });
+    path.push(line);
   }
-  setTrackAnis(path)
-  }
+  
+  setTrackAnis(path);
+};
+
+// 根据距离动态调整车速
+const calculateSpeed = (distance) => {
+  let speed = 35;
+  if (distance / 1000 > 1000) speed = (distance / 1000) / 200;
+  else if (distance / 1000 > 500) speed = (distance / 1000) / 67;
+  else if (distance / 1000 > 200) speed = (distance / 1000) / 17;
+  else if (distance / 1000 > 100) speed = (distance / 1000) / 7;
+  else if (distance / 1000 > 50) speed = (distance / 1000) / 2.6;
+  else speed = (distance / 1000) / 0.7;
+
+  return speed < 35 ? 35 : speed;
+};
+
   // 开始滚动
   const changeSpeedStart= () => {
     let marks = map.getAllOverlays('marker')

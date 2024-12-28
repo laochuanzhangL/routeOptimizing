@@ -115,191 +115,136 @@ export const stopAnimation = (marker) => {
   marker.stopMove()
 }
 
-export const generateRouteLine = (route, AMap, map, color) => {
-  const length = route.length
+
+export const generateRouteLine = async (route, AMap, map, color) => {
+  const length = route.length;
   // 构造路线导航类
   const driving = new AMap.Driving({
     policy: AMap.DrivingPolicy.LEAST_TIME,
-  })
-  let carMarkerAndLineArr
-  let i = 0
-  return Promise.all(
-    route.map((item, index) => {
-      return new Promise((resolve, reject) => {
-        if (index === length - 1) {
-          resolve({
-            distance: 0,
-            time: 0,
-          })
-        }
-        driving.search(
-          new AMap.LngLat(route[index]['lng'], route[index]['lat']),
-          new AMap.LngLat(route[index + 1]['lng'], route[index + 1]['lat']),
-          (status, result) => {
-            if (status === 'error') console.log(status, result)
-            if (status === 'complete') {
-              if (result.routes && result.routes.length) {
-                carMarkerAndLineArr = drawRoute(
-                  result.routes[0],
-                  index,
-                  route[index].nodeName
-                )
-              }
-            }
-            if (index === 0) {
-              //段落动画视野跟随
-              carMarkerAndLineArr.carMarker.on('moving', function (e) {
-                //passedPolyline.setPath(e.passedPath);
-                map.setCenter(e.target.getPosition(), true)
-              })
-              resolve({
-                distance: result.routes[0].distance,
-                time: result.routes[0].time,
-                carMarker: carMarkerAndLineArr.carMarker,
-                lineArr: carMarkerAndLineArr.lineArr,
-              })
-            } else {
-              resolve({
-                distance: result.routes[0].distance,
-                time: result.routes[0].time,
-                lineArr: carMarkerAndLineArr.lineArr,
-              })
-            }
+  });
+
+  const results = [];
+  const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  for (let index = 0; index < length - 1; index++) {
+    // 控制请求间隔，避免过快请求
+    await delay(300); 
+
+    const result = await new Promise((resolve, reject) => {
+      driving.search(
+        new AMap.LngLat(route[index].lng, route[index].lat),
+        new AMap.LngLat(route[index + 1].lng, route[index + 1].lat),
+        (status, result) => {
+          if (status === 'error') {
+            console.error(`Error at index ${index}:`, result);
+            reject('Request failed');
           }
-        )
+          if (status === 'complete' && result.routes && result.routes.length) {
+            resolve(result.routes[0]);
+          } else {
+            reject(`No route found for index ${index}`);
+          }
+        }
+      );
+    });
 
-        setTimeout(() => {
-          driving.search(
-            new AMap.LngLat(route[index]['lng'], route[index]['lat']),
-            new AMap.LngLat(route[index + 1]['lng'], route[index + 1]['lat']),
-            (status, result) => {
-              if (status === 'complete') {
-                if (result.routes && result.routes.length) {
-                  carMarkerAndLineArr = drawRoute(
-                    result.routes[0],
-                    index,
-                    route[index].nodeName
-                  )
-                }
-              }
-              if (index === 0) {
-                //段落动画视野跟随
-                carMarkerAndLineArr.carMarker.on('moving', function (e) {
-                  //passedPolyline.setPath(e.passedPath);
-                  map.setCenter(e.target.getPosition(), true)
-                })
-                resolve({
-                  distance: result.routes[0].distance,
-                  time: result.routes[0].time,
-                  carMarker: carMarkerAndLineArr.carMarker,
-                  lineArr: carMarkerAndLineArr.lineArr,
-                })
-              } else {
-                resolve({
-                  distance: result.routes[0].distance,
-                  time: result.routes[0].time,
-                  lineArr: carMarkerAndLineArr.lineArr,
-                })
-              }
-            }
-          )
-        }, 50 * index)
-      })
-    })
-  )
-  // 创建信息窗体
-  function createInfoWindow(title, content) {
-    let info = document.createElement('div')
-    info.className = 'custom-info input-card content-window-card'
-
-    //可以通过下面的方式修改自定义窗体的宽高
-    info.style.width = '240px'
-    // 定义顶部标题
-    let top = document.createElement('div')
-    let titleD = document.createElement('div')
-    let closeX = document.createElement('img')
-    top.className = 'info-top'
-    titleD.innerHTML = title
-    closeX.src = 'https://webapi.amap.com/images/close2.gif'
-    closeX.onclick = closeInfoWindow
-
-    top.appendChild(titleD)
-    top.appendChild(closeX)
-    info.appendChild(top)
-
-    // 定义中部内容
-    let middle = document.createElement('div')
-    middle.className = 'info-middle'
-    middle.style.backgroundColor = 'white'
-    middle.innerHTML = content
-    info.appendChild(middle)
-
-    // 定义底部内容
-    let bottom = document.createElement('div')
-    bottom.className = 'info-bottom'
-    bottom.style.position = 'relative'
-    bottom.style.top = '0px'
-    bottom.style.margin = '0 auto'
-    let sharp = document.createElement('img')
-    sharp.src = 'https://webapi.amap.com/images/sharp.png'
-    bottom.appendChild(sharp)
-    info.appendChild(bottom)
-    return info
+    const carMarkerAndLineArr = drawRoute(result, index, route[index].nodeName);
+    results.push({
+      distance: result.distance,
+      time: result.time,
+      carMarker: carMarkerAndLineArr.carMarker,
+      lineArr: carMarkerAndLineArr.lineArr,
+    });
   }
-  //关闭信息窗体
-  function closeInfoWindow() {
-    map.clearInfoWindow()
-  }
+
+  return results;
+
+  // 绘制路径并返回标记和路径信息
   function drawRoute(route, index, address) {
-    const path = parseRouteToPath(route)
-    const routeLine = createPolyline(AMap, path, color)
-    let marker, carMarker, lineArr
-    lineArr = path.map((item) => [item.lng, item.lat])
+    const path = parseRouteToPath(route);
+    const routeLine = createPolyline(AMap, path, color);
+    let marker, carMarker, lineArr;
+    lineArr = path.map((item) => [item.lng, item.lat]);
+
     if (index === 0) {
-      marker = createMarker(AMap, map, path[0], marke_r, -10, -31)
+      marker = createMarker(AMap, map, path[0], marke_r, -10, -31);
       carMarker = new AMap.Marker({
         position: path[0],
         icon: car,
         offset: new AMap.Pixel(-13, -26),
-        extData: {
-          name: 'car',
-        },
-      })
-      marker.on('mouseover', (e) => {
-        //实例化信息窗体
-        let title = '<span style="font-size:20px;">站点</span>',
-          content = []
-        content.push(address)
+        extData: { name: 'car' },
+      });
+      marker.on('mouseover', () => {
+        let title = '<span style="font-size:20px;">站点</span>';
+        let content = [address];
         let infoWindow = new AMap.InfoWindow({
-          isCustom: true, //使用自定义窗体
+          isCustom: true,
           content: createInfoWindow(title, content.join('<br/>')),
           offset: new AMap.Pixel(16, -45),
-        })
-        infoWindow.open(map, marker.getPosition())
-      })
-      marker.on('mouseout', function () {
-        map.clearInfoWindow()
-      })
-      map.add(routeLine)
+        });
+        infoWindow.open(map, marker.getPosition());
+      });
+      marker.on('mouseout', () => map.clearInfoWindow());
+      map.add(routeLine);
     } else {
-      let marker = createMarker(AMap, map, path[0], mid, -13, -26)
-      marker.on('mouseover', (e) => {
-        //实例化信息窗体
-        let title = '<span style="font-size:20px;">站点</span>',
-          content = []
-        content.push(address)
+      marker = createMarker(AMap, map, path[0], mid, -13, -26);
+      marker.on('mouseover', () => {
+        let title = '<span style="font-size:20px;">站点</span>';
+        let content = [address];
         let infoWindow = new AMap.InfoWindow({
-          isCustom: true, //使用自定义窗体
+          isCustom: true,
           content: createInfoWindow(title, content.join('<br/>')),
           offset: new AMap.Pixel(16, -45),
-        })
-        infoWindow.open(map, marker.getPosition())
-      })
-      marker.on('mouseout', function () {
-        map.clearInfoWindow()
-      })
-      map.add(routeLine)
+        });
+        infoWindow.open(map, marker.getPosition());
+      });
+      marker.on('mouseout', () => map.clearInfoWindow());
+      map.add(routeLine);
     }
-    return { carMarker, lineArr }
+
+    return { carMarker, lineArr };
   }
-}
+
+  // 创建自定义信息窗体
+  function createInfoWindow(title, content) {
+    let info = document.createElement('div');
+    info.className = 'custom-info input-card content-window-card';
+    info.style.width = '240px';
+
+    let top = document.createElement('div');
+    let titleD = document.createElement('div');
+    let closeX = document.createElement('img');
+    top.className = 'info-top';
+    titleD.innerHTML = title;
+    closeX.src = 'https://webapi.amap.com/images/close2.gif';
+    closeX.onclick = closeInfoWindow;
+
+    top.appendChild(titleD);
+    top.appendChild(closeX);
+    info.appendChild(top);
+
+    let middle = document.createElement('div');
+    middle.className = 'info-middle';
+    middle.style.backgroundColor = 'white';
+    middle.innerHTML = content;
+    info.appendChild(middle);
+
+    let bottom = document.createElement('div');
+    bottom.className = 'info-bottom';
+    bottom.style.position = 'relative';
+    bottom.style.top = '0px';
+    bottom.style.margin = '0 auto';
+    let sharp = document.createElement('img');
+    sharp.src = 'https://webapi.amap.com/images/sharp.png';
+    bottom.appendChild(sharp);
+    info.appendChild(bottom);
+
+    return info;
+  }
+
+  // 关闭信息窗体
+  function closeInfoWindow() {
+    map.clearInfoWindow();
+  }
+};
+
